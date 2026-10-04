@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Zynth Client · Dashboard</title>
+<meta name="theme-color" content="#07050A">
+<link rel="icon" type="image/png" href="zynth-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  color-scheme: dark;
+  --bg: #07050A;
+  --bg-2: #0B070E;
+  --panel: #121214;
+  --panel-2: #17161A;
+  --ink: #F2F2F2;
+  --text: #D4D4D6;
+  --accent: #FF4DA6;
+  --accent-light: #FF82C1;
+  --accent-deep: #54233D;
+  --blush: #FFC8DC;
+  --ghost: rgba(255,255,255,0.03);
+  --ghost-mid: rgba(255,255,255,0.05);
+  --ghost-strong: rgba(255,255,255,0.09);
+  --border: rgba(255,255,255,0.08);
+  --border-bright: rgba(255,255,255,0.16);
+  --dim: #8B8B90;
+  --dim2: #6E6E74;
+  --green: #34D399;
+  --red: #F87171;
+  --yellow: #FBBF24;
+  --blue: #5865F2;
+  --purple: #A78BFA;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --font: "Barlow", "Bahnschrift", "Segoe UI", system-ui, sans-serif;
+  --display: "Barlow Semi Condensed", "Barlow", "Bahnschrift", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/1.55 var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+::selection { background: var(--accent); color: #fff; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+code { font-family: var(--mono); font-size: .9em; color: var(--blush); }
+
+/* Custom cursor is turned off; the elements stay for the script */
+#cursor, #cursor-trail { display: none; }
+
+/* Particle canvas: the script draws blue, this shifts it to Zynth pink */
+#bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; filter: hue-rotate(125deg) saturate(2.2) brightness(1.6); opacity: .55; }
+.noise {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+.top-glow {
+  position: fixed; top: -260px; left: 50%; transform: translateX(-50%);
+  width: 900px; max-width: 100vw; height: 520px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,77,166,.16) 0%, rgba(84,35,61,.25) 35%, transparent 70%);
+  pointer-events: none; z-index: 1;
+}
+
+.page { position: relative; z-index: 2; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 14px 28px; padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(7,5,10,.72);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: background .3s;
+}
+nav.scrolled { background: rgba(7,5,10,.9); }
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font: 700 19px/1 var(--display); letter-spacing: .08em;
+  text-decoration: none; color: var(--ink);
+}
+.nav-logo small, .footer-logo small { font: 600 9.5px/1 var(--font); letter-spacing: .4em; color: var(--accent-light); margin-left: 2px; }
+.hex { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hex img { width: 100%; height: 100%; filter: drop-shadow(0 4px 12px rgba(255,77,166,.45)); }
+.nav-right { display: flex; align-items: center; gap: 14px; }
+
+.btn-burger {
+  width: 38px; height: 38px; border-radius: 12px;
+  align-items: center; justify-content: center;
+  background: var(--ghost-mid); border: 1px solid var(--border);
+  color: var(--text); cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.btn-burger svg { width: 17px; height: 17px; }
+.btn-burger:hover, .btn-burger.open { border-color: var(--accent); color: var(--ink); background: var(--accent-deep); }
+
+.sidebar-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 140;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity .2s;
+}
+.sidebar-backdrop.open { display: block; opacity: 1; }
+
+/* ── APP SHELL / SIDEBAR ── */
+.app-shell { display: flex; align-items: flex-start; }
+
+.dashboard-sidebar {
+  width: 248px; flex-shrink: 0;
+  position: sticky; top: 0; align-self: flex-start;
+  height: 100vh; padding: 92px 14px 20px;
+  border-right: 1px solid var(--border);
+  background: rgba(14,12,17,.86);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  z-index: 90;
+  flex-direction: column;
+}
+
+.sidebar-user {
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px; margin-bottom: 18px;
+  background: var(--ghost-mid); border: 1px solid var(--border); border-radius: 14px;
+}
+.sidebar-user-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.sidebar-user-tag { font: 600 10px/1 var(--font); color: var(--accent-light); letter-spacing: .16em; text-transform: uppercase; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+.sidebar-nav::before { content: "Menu"; font: 600 10.5px/1 var(--font); letter-spacing: .18em; text-transform: uppercase; color: var(--dim2); padding: 4px 12px 10px; }
+
+.menu-item {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; background: none; border: 1px solid transparent; text-align: left;
+  border-radius: 12px;
+  color: var(--dim); padding: 11px 12px;
+  font: 600 15px/1 var(--font);
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+}
+.menu-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+.menu-item:hover { background: var(--ghost-mid); color: var(--ink); }
+.menu-item.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(84,35,61,.75), rgba(255,255,255,.03));
+  border-color: rgba(255,77,166,.28);
+}
+.menu-item.active svg { color: var(--accent); }
+
+.sidebar-logout { margin-top: auto; width: 100%; justify-content: center; display: flex; align-items: center; gap: 8px; }
+
+.nav-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid rgba(255,77,166,.45); flex-shrink: 0; background: var(--panel); }
+.nav-username { font: 600 15px/1.1 var(--font); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.btn-ghost {
+  background: rgba(18,16,22,.55); color: var(--text);
+  border: 1px solid var(--border-bright);
+  border-radius: 999px;
+  padding: 10px 20px;
+  font: 600 14px/1 var(--font); letter-spacing: .01em;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.btn-ghost:hover { border-color: var(--accent); color: #fff; background: linear-gradient(180deg, #3c1f31, var(--accent-deep)); }
+
+main { flex: 1; min-width: 0; padding: 104px 44px 72px; }
+
+@media(min-width: 901px) {
+  .btn-burger { display: none !important; }
+}
+
+@media(max-width: 900px) {
+  .dashboard-sidebar {
+    position: fixed; top: 0; left: 0; height: 100vh;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    box-shadow: 0 0 60px rgba(0,0,0,.6);
+    background: #0E0C11;
+  }
+  .dashboard-sidebar.open { transform: translateX(0); z-index: 200; }
+}
+
+/* ── LOGIN ── */
+.screen-login {
+  min-height: 80vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; gap: 24px;
+  max-width: 560px; margin: 0 auto;
+}
+.screen-login::before {
+  content: ""; width: 120px; height: 120px;
+  background: url("zynth-logo.png") center / contain no-repeat;
+  filter: drop-shadow(0 16px 44px rgba(255,77,166,.45));
+  animation: drop-in 1s cubic-bezier(.34,1.56,.64,1) both, float 6s ease-in-out 1.1s infinite;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border-bright); background: var(--ghost-mid);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: 500 11.5px/1 var(--mono);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--text);
+}
+.badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(255,77,166,.2); animation: pulse 2s infinite; }
+.hero-title { font: 700 clamp(52px,8vw,92px)/.95 var(--display); color: var(--ink); }
+.hero-title em {
+  font-style: normal;
+  background: linear-gradient(180deg, #fff 10%, var(--blush) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-sub { font-size: 17px; color: var(--dim); max-width: 420px; line-height: 1.6; }
+.btn-discord {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--blue); color: white;
+  border: none; padding: 16px 32px; border-radius: 999px;
+  font: 600 16px/1 var(--font); letter-spacing: .01em;
+  cursor: pointer; text-decoration: none;
+  transition: transform .15s, filter .2s, box-shadow .2s;
+  box-shadow: 0 14px 34px -12px rgba(88,101,242,.7);
+}
+.btn-discord:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn-discord svg { width: 20px; height: 20px; fill: white; }
+
+.dashboard { animation: fadeUp .5s .05s both; max-width: 940px; margin: 0 auto; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+@keyframes drop-in { 0%{opacity:0;transform:scale(.4) rotate(-12deg)} 60%{opacity:1;transform:scale(1.08) rotate(3deg)} 80%{transform:scale(.96,1.04)} 100%{opacity:1;transform:none} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+.dash-header { margin-bottom: 28px; }
+.dash-eyebrow {
+  font: 600 12px/1 var(--font); color: var(--accent);
+  letter-spacing: .18em; text-transform: uppercase; margin-bottom: 12px;
+}
+.dash-title { font: 700 clamp(34px,4.5vw,52px)/1 var(--display); color: var(--ink); }
+.dash-title em { font-style: normal; color: var(--accent); }
+
+/* ── LICENSE PANEL ── */
+.license-panel {
+  border: 1px solid var(--border); background: var(--panel);
+  border-radius: var(--radius);
+  margin-bottom: 16px; overflow: hidden;
+}
+.status-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.stat-cell { padding: 20px 22px; position: relative; border-right: 1px solid var(--border); min-width: 0; }
+.stat-cell:last-child { border-right: none; }
+.stat-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ghost-mid); color: var(--accent-light);
+  margin-bottom: 14px;
+}
+.stat-icon svg { width: 16px; height: 16px; }
+.stat-label { font: 600 11px/1 var(--font); color: var(--dim); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
+.stat-val { font: 700 20px/1.1 var(--display); color: var(--ink); }
+
+.status-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; }
+.status-pill.none    { background: rgba(251,191,36,.1);  border: 1px solid rgba(251,191,36,.3);  color: var(--yellow); }
+.status-pill.active  { background: rgba(52,211,153,.1);  border: 1px solid rgba(52,211,153,.3);  color: var(--green); }
+.status-pill.expired { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
+.pill-dot { width: 6px; height: 6px; border-radius: 50%; animation: pulse 2.2s infinite; }
+.none .pill-dot { background: var(--yellow); }
+.active .pill-dot { background: var(--green); }
+.expired .pill-dot { background: var(--red); }
+
+.bar-wrap { margin-top: 12px; }
+.bar-track { height: 6px; border-radius: 999px; background: var(--ghost-strong); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent-deep), var(--accent)); transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+.bar-sub { font-size: 12.5px; color: var(--dim); margin-top: 6px; }
+
+.key-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  border-top: 1px solid var(--border); background: var(--ghost);
+  padding: 16px 22px;
+}
+.key-inner { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.key-label-sm { font: 600 11px/1 var(--font); color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
+.key-val { font: 500 14px/1.3 var(--mono); color: var(--blush); letter-spacing: .06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.key-btns { display: flex; gap: 8px; flex-shrink: 0; }
+.key-btn {
+  background: rgba(18,16,22,.55); border: 1px solid var(--border-bright); color: var(--text);
+  padding: 8px 16px; border-radius: 999px;
+  font: 600 13px/1 var(--font); cursor: pointer; transition: border-color .2s, color .2s, background .2s;
+}
+.key-btn:hover { border-color: var(--accent); color: #fff; background: var(--accent-deep); }
+
+/* ── CARDS ── */
+.cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.card {
+  display: flex; flex-direction: column; align-items: flex-start;
+  background: var(--panel); padding: 22px; position: relative; overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+.card-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: var(--ghost-mid); margin-bottom: 16px; color: var(--accent-light); }
+.card-icon svg { width: 18px; height: 18px; }
+.card-tag { font: 600 11px/1 var(--font); color: var(--dim); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; display: block; }
+.card-title { font: 700 20px/1.15 var(--display); color: var(--ink); margin-bottom: 6px; }
+.card-desc { font-size: 14px; color: var(--dim); line-height: 1.55; margin-bottom: 14px; }
+
+.card.accent-discord .card-icon { background: rgba(88,101,242,.16); color: #8B95FF; }
+.card.accent-discord:hover { border-color: rgba(88,101,242,.45); }
+.card.accent-docs:hover { border-color: rgba(255,255,255,.22); }
+.card.accent-billing .card-icon { background: rgba(255,77,166,.12); color: var(--accent-light); }
+.card.accent-billing:hover { border-color: rgba(255,77,166,.4); }
+
+/* ── DOWNLOAD HERO ── */
+.dl-hero {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  background: radial-gradient(ellipse 80% 100% at 50% 0%, rgba(84,35,61,.75) 0%, var(--panel) 70%);
+  border: 1px solid rgba(255,77,166,.28); border-radius: 20px;
+  padding: 40px 28px; margin-bottom: 16px; position: relative; overflow: hidden;
+}
+.dl-hero::after { content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.dl-hero-icon {
+  width: 60px; height: 60px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,77,166,.14); border: 1px solid rgba(255,77,166,.3); color: var(--accent-light); margin-bottom: 16px;
+}
+.dl-hero-icon svg { width: 26px; height: 26px; }
+.dl-hero-title { font: 700 30px/1.05 var(--display); color: var(--ink); margin-bottom: 8px; }
+.dl-hero-desc { font-size: 15px; color: var(--dim); line-height: 1.6; margin-bottom: 6px; max-width: 380px; }
+.card-cta {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: auto;
+  font: 600 14px/1 var(--font); text-decoration: none; color: var(--ink);
+  padding: 9px 16px; border-radius: 999px;
+  background: rgba(18,16,22,.55); border: 1px solid var(--border-bright);
+  transition: border-color .2s, background .2s; position: relative; z-index: 1; cursor: pointer;
+}
+.card-cta:hover { border-color: var(--accent); background: var(--accent-deep); }
+.btn-dl {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 18px;
+  background: var(--accent); color: #fff; border: none;
+  padding: 14px 30px;
+  font: 600 16px/1 var(--font); letter-spacing: .01em;
+  cursor: pointer; text-decoration: none;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px -8px rgba(255,77,166,.6);
+  transition: transform .15s, background .15s, box-shadow .2s, opacity .15s;
+  position: relative; overflow: hidden; z-index: 1;
+}
+.btn-dl svg { width: 15px; height: 15px; }
+.btn-dl::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.3) 50%, transparent 100%);
+  transform: translateX(-100%); transition: transform .5s;
+}
+.btn-dl:hover { transform: translateY(-2px); background: var(--accent-light); box-shadow: 0 12px 40px rgba(255,77,166,.45); }
+.btn-dl:hover::after { transform: translateX(100%); }
+.btn-dl.locked { background: var(--ghost-strong); color: var(--dim); box-shadow: none; cursor: not-allowed; }
+.btn-dl.locked:hover { transform: none; background: var(--ghost-strong); box-shadow: none; }
+.btn-dl.locked::after { display: none; }
+
+/* ── SHARED SECTION SHELL ── */
+.redeem-section, .hwid-section, .review-section, .imgup-section {
+  border: 1px solid var(--border); background: var(--panel);
+  border-radius: var(--radius); padding: 26px; margin-bottom: 16px;
+}
+.redeem-section-title, .hwid-section-title, .review-section-title, .imgup-section-title {
+  font: 700 22px/1.15 var(--display); color: var(--ink); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.redeem-section-sub, .hwid-section-sub, .review-section-sub, .imgup-section-sub { font-size: 14.5px; color: var(--dim); line-height: 1.6; }
+.hwid-section-sub strong { color: var(--text); font-weight: 600; }
+.review-section-sub, .imgup-section-sub { margin-bottom: 20px; }
+
+/* inputs */
+.redeem-input, .review-textarea, .imgup-caption {
+  background: var(--bg-2); border: 1px solid var(--border-bright); color: var(--ink);
+  border-radius: var(--radius-sm); outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.redeem-input:focus, .review-textarea:focus, .imgup-caption:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,77,166,.15); }
+.redeem-input::placeholder, .review-textarea::placeholder, .imgup-caption::placeholder { color: var(--dim2); }
+
+/* primary buttons */
+.btn-redeem, .btn-review, .btn-imgup {
+  background: var(--accent); color: #fff; border: none; padding: 14px 28px;
+  font: 600 15px/1 var(--font); letter-spacing: .01em; cursor: pointer; white-space: nowrap;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px -8px rgba(255,77,166,.6);
+  transition: transform .15s, background .15s, opacity .2s;
+}
+.btn-redeem:hover, .btn-review:hover, .btn-imgup:hover { transform: translateY(-1px); background: var(--accent-light); }
+.btn-redeem:disabled, .btn-review:disabled, .btn-imgup:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+/* messages */
+.redeem-msg, .hwid-msg, .review-msg, .imgup-msg { font-size: 14px; margin-top: 12px; min-height: 18px; }
+.redeem-msg { display: flex; align-items: center; gap: 8px; }
+.redeem-msg.ok, .hwid-msg.ok, .review-msg.ok, .imgup-msg.ok { color: var(--green); }
+.redeem-msg.err, .hwid-msg.err, .review-msg.err, .imgup-msg.err { color: var(--red); }
+
+/* ── REDEEM ── */
+.redeem-section { border-color: rgba(255,77,166,.25); }
+.redeem-section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+.redeem-inner { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
+.redeem-input { padding: 14px 16px; flex: 1; min-width: 220px; font: 500 14px/1.2 var(--mono); letter-spacing: .06em; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); right: 24px; z-index: 9000;
+  background: rgba(18,18,20,.96); border: 1px solid var(--border-bright);
+  backdrop-filter: blur(16px);
+  padding: 13px 18px; border-radius: 14px;
+  font: 500 14px/1.4 var(--font); color: var(--ink);
+  opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s;
+  pointer-events: none; max-width: min(340px, calc(100vw - 48px));
+  box-shadow: 0 20px 50px -15px rgba(0,0,0,.7);
+}
+#toast.show  { opacity: 1; transform: translateY(0); }
+#toast.green { border-color: rgba(52,211,153,.45); color: var(--green); }
+#toast.red   { border-color: rgba(248,113,113,.45); color: var(--red); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border); padding: 28px 44px calc(28px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+}
+.footer-logo { display: flex; align-items: center; gap: 9px; font: 700 16px/1 var(--display); letter-spacing: .08em; color: var(--ink); text-decoration: none; }
+.footer-logo .hex { width: 24px; height: 24px; }
+.footer-copy { font-size: 13px; color: var(--dim2); }
+
+@media(max-width: 1000px) {
+  .cards { grid-template-columns: 1fr 1fr; }
+}
+
+@media(max-width: 860px) {
+  nav { padding-left: 16px; padding-right: 16px; }
+  main { padding: 92px 16px 56px; }
+  .status-row { grid-template-columns: 1fr 1fr; }
+  .stat-cell:nth-child(2n) { border-right: none; }
+  .stat-cell:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
+  .cards { grid-template-columns: 1fr; gap: 10px; }
+  .dl-hero { padding: 32px 20px; }
+  footer { padding-left: 16px; padding-right: 16px; flex-direction: column; text-align: center; }
+  .stat-cell { padding: 18px; }
+  .redeem-section, .hwid-section, .review-section, .imgup-section { padding: 20px; }
+}
+@media(max-width: 420px) {
+  .status-row { grid-template-columns: 1fr; }
+  .stat-cell { border-right: none !important; border-bottom: 1px solid var(--border); }
+  .stat-cell:last-child { border-bottom: none; }
+  .btn-redeem { width: 100%; }
+}
+
+/* ── HWID ── */
+.hwid-section { display: none; }
+.hwid-dots { display: flex; gap: 8px; margin: 18px 0 10px; }
+.hwid-dot {
+  width: 34px; height: 8px; border-radius: 999px;
+  background: var(--ghost-strong); border: 1px solid var(--border);
+  transition: background .3s, border-color .3s;
+}
+.hwid-dot.used { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(255,77,166,.45); }
+.hwid-dot.empty { background: var(--ghost-strong); border-color: var(--border); }
+.hwid-info { font-size: 14px; color: var(--dim); margin-bottom: 18px; }
+.btn-hwid-reset {
+  background: rgba(18,16,22,.55); color: var(--ink); border: 1px solid var(--border-bright);
+  border-radius: 999px; padding: 12px 24px;
+  font: 600 15px/1 var(--font); cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.btn-hwid-reset:hover { background: var(--accent-deep); border-color: var(--accent); transform: translateY(-1px); }
+.btn-hwid-reset:disabled { opacity: .4; cursor: not-allowed; transform: none; background: rgba(18,16,22,.55); border-color: var(--border-bright); }
+
+/* ── LOCKED NOTICE ── */
+.locked-notice {
+  border: 1px dashed var(--border-bright); background: var(--panel);
+  border-radius: var(--radius); padding: 40px 24px; text-align: center; margin-bottom: 16px;
+}
+.locked-notice-icon {
+  width: 46px; height: 46px; margin: 0 auto 14px; border-radius: 14px;
+  border: 1px solid rgba(255,77,166,.3); background: rgba(255,77,166,.1);
+  display: flex; align-items: center; justify-content: center; color: var(--accent-light);
+}
+.locked-notice-icon svg { width: 20px; height: 20px; }
+.locked-notice-title { font: 700 20px/1.2 var(--display); color: var(--ink); margin-bottom: 4px; }
+.locked-notice-sub { font-size: 14.5px; color: var(--dim); }
+
+/* ── REVIEW FORM ── */
+.review-section { display: none; }
+.review-stars { display: flex; gap: 4px; margin-bottom: 14px; }
+.star-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 28px; line-height: 1; color: var(--ghost-strong);
+  -webkit-text-stroke: 1px var(--border-bright);
+  transition: color .15s, transform .15s;
+  padding: 2px;
+}
+.star-btn.active, .star-btn:hover { color: var(--accent); -webkit-text-stroke: 0; transform: scale(1.12); }
+.review-textarea {
+  width: 100%; min-height: 110px; resize: vertical;
+  padding: 14px 16px;
+  font: 400 15px/1.6 var(--font);
+  margin-bottom: 8px;
+}
+.review-char-count { font: 400 12px/1 var(--mono); color: var(--dim2); text-align: right; margin-bottom: 14px; }
+.review-cooldown-note {
+  font-size: 14px; color: var(--yellow); margin-bottom: 14px;
+  padding: 10px 14px; border-radius: 10px; background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.25);
+}
+
+.anon-row {
+  display: flex; align-items: center; gap: 9px; margin-bottom: 16px;
+  font-size: 14px; color: var(--dim);
+  cursor: pointer; user-select: none;
+}
+.anon-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+/* ── LISTS + BADGES ── */
+.list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+.list-header-title { font: 700 22px/1.15 var(--display); color: var(--ink); }
+.access-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px;
+  font: 600 11px/1 var(--font); letter-spacing: .1em; text-transform: uppercase;
+}
+.access-badge.staff { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); color: var(--green); }
+.access-badge.dev   { background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.35); color: var(--purple); }
+
+.review-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.review-item {
+  border: 1px solid var(--border); background: var(--panel); border-radius: 14px;
+  padding: 16px 18px; transition: border-color .2s;
+}
+.review-item:hover { border-color: var(--border-bright); }
+.review-item-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+.review-item-user { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.review-item-avatar { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-bright); }
+.review-item-name { font-weight: 600; font-size: 15px; color: var(--ink); overflow-wrap: anywhere; }
+.review-item-stars { font-size: 15px; color: var(--accent); letter-spacing: 2px; }
+.review-item-text { font-size: 15px; color: var(--text); line-height: 1.6; overflow-wrap: anywhere; }
+.review-item-meta { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.review-item-meta:empty { display: none; }
+.pill-anon, .pill-revealed, .pill-edited {
+  font: 600 10.5px/1 var(--font); letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 10px; border-radius: 999px;
+}
+.pill-anon { background: var(--ghost-strong); color: var(--dim); }
+.pill-revealed { background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.32); color: var(--purple); }
+.pill-edited { background: var(--ghost-mid); color: var(--dim2); }
+.empty-note {
+  font-size: 14.5px; color: var(--dim); padding: 28px 16px; text-align: center;
+  border: 1px dashed var(--border); border-radius: 14px; grid-column: 1 / -1;
+}
+
+.btn-own-edit, .btn-own-delete, .btn-revoke {
+  border-radius: 999px; padding: 6px 14px;
+  font: 600 12.5px/1 var(--font);
+  cursor: pointer; transition: background .2s, border-color .2s, color .2s;
+}
+.btn-own-edit { border: 1px solid var(--border-bright); background: transparent; color: var(--text); }
+.btn-own-edit:hover { border-color: var(--accent); color: #fff; background: var(--accent-deep); }
+.btn-own-delete, .btn-revoke { border: 1px solid rgba(248,113,113,.32); color: var(--red); background: rgba(248,113,113,.08); }
+.btn-own-delete:hover, .btn-revoke:hover { background: rgba(248,113,113,.18); }
+.btn-own-delete:disabled, .btn-revoke:disabled { opacity: .45; cursor: not-allowed; }
+#btn-review-cancel, #btn-imgup-cancel { padding: 13px 22px; font-size: 14px; }
+
+/* ── MODERATION BANNER ── */
+.mod-warning {
+  display: flex; align-items: flex-start; gap: 14px;
+  border: 1px solid var(--border); background: var(--panel);
+  border-left: 3px solid var(--yellow);
+  border-radius: var(--radius); padding: 16px 20px; margin-bottom: 16px;
+}
+.mod-warning-icon {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(251,191,36,.1); color: var(--yellow);
+  display: flex; align-items: center; justify-content: center;
+}
+.mod-warning-icon svg { width: 17px; height: 17px; }
+.mod-warning-title { font-weight: 600; font-size: 15.5px; color: var(--ink); margin-bottom: 3px; }
+.mod-warning-text { font-size: 14px; color: var(--dim); line-height: 1.6; }
+.mod-warning-text strong { color: var(--text); font-weight: 600; }
+
+/* ── CLIPS ── */
+.clip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.clip-card { border: 1px solid var(--border); background: var(--panel); border-radius: 14px; overflow: hidden; transition: border-color .2s, transform .2s; }
+.clip-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+.clip-card-imgs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; background: var(--bg); }
+.clip-card-imgs img { width: 100%; height: 150px; object-fit: cover; display: block; }
+.clip-card-body { padding: 12px 14px 14px; }
+.clip-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; min-width: 0; }
+.clip-card-avatar { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border-bright); flex-shrink: 0; }
+.clip-card-name { font-weight: 600; font-size: 14.5px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clip-card-caption { font-size: 14px; color: var(--dim); line-height: 1.5; overflow-wrap: anywhere; }
+.clip-card-meta { display: flex; align-items: center; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.clip-card-meta:empty { display: none; }
+
+/* ── UPLOAD ── */
+.imgup-section { display: none; }
+.imgup-drop {
+  border: 1.5px dashed var(--border-bright); background: var(--bg-2);
+  border-radius: 14px;
+  padding: 34px 20px; text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s; margin-bottom: 12px;
+  position: relative;
+}
+.imgup-drop:hover, .imgup-drop.dragover { border-color: var(--accent); background: rgba(84,35,61,.35); }
+.imgup-drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.imgup-drop-icon { margin: 0 auto 12px; width: 48px; height: 48px; border-radius: 14px; background: rgba(255,77,166,.12); display: flex; align-items: center; justify-content: center; }
+.imgup-drop-icon svg { width: 22px; height: 22px; stroke: var(--accent-light); }
+.imgup-drop-label { font-size: 14px; color: var(--dim); line-height: 1.65; }
+.imgup-drop-label strong { color: var(--ink); font-weight: 600; }
+.imgup-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.imgup-preview:empty { display: none; }
+.imgup-thumb { width: 80px; height: 80px; object-fit: cover; border: 1px solid var(--border-bright); border-radius: 10px; position: relative; }
+.imgup-thumb-wrap { position: relative; }
+.imgup-thumb-rm {
+  position: absolute; top: -7px; right: -7px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--panel-2); border: 1px solid var(--border-bright); color: var(--ink);
+  font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; line-height: 1; transition: background .15s, border-color .15s;
+}
+.imgup-thumb-rm:hover { background: #7f1d1d; border-color: var(--red); }
+.imgup-caption { padding: 13px 16px; width: 100%; margin-bottom: 14px; font: 400 15px/1.3 var(--font); }
+
+/* ── MODALS (shared look) ── */
+#imgup-modal-overlay, #dl-modal-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+#imgup-modal-overlay.open, #dl-modal-overlay.open { display: flex; animation: fadeIn .2s both; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes slideUp { from{opacity:0;transform:translateY(14px) scale(.98)} to{opacity:1;transform:none} }
+
+#imgup-modal, #dl-modal {
+  background: var(--panel);
+  border: 1px solid var(--border-bright);
+  border-radius: 20px;
+  box-shadow: 0 40px 100px -20px rgba(0,0,0,.8);
+  width: 100%; max-width: 500px; max-height: calc(100vh - 32px); overflow-y: auto;
+  padding: 28px;
+  position: relative;
+  animation: slideUp .24s cubic-bezier(.2,.8,.2,1) both;
+}
+.imgup-modal-close, .dlm-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ghost-mid); border: 1px solid var(--border); color: var(--dim);
+  font-size: 13px; cursor: pointer; line-height: 1;
+  transition: color .15s, background .15s;
+}
+.imgup-modal-close:hover, .dlm-close:hover { color: var(--ink); background: var(--ghost-strong); }
+.imgup-modal-header, .dlm-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-right: 36px; }
+.imgup-modal-icon, .dlm-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.imgup-modal-icon { border: 1px solid rgba(251,191,36,.3); background: rgba(251,191,36,.1); }
+.imgup-modal-icon svg { width: 19px; height: 19px; stroke: var(--yellow); }
+.dlm-icon { border: 1px solid rgba(248,113,113,.3); background: rgba(248,113,113,.1); }
+.dlm-icon svg { width: 19px; height: 19px; stroke: var(--red); }
+.imgup-modal-title, .dlm-title { font: 700 22px/1.15 var(--display); color: var(--ink); }
+.imgup-modal-sub, .dlm-sub { font-size: 14px; color: var(--dim); margin-top: 2px; }
+
+.imgup-modal-warning, .dlm-warning { border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; text-align: center; }
+.imgup-modal-warning { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.28); }
+.dlm-warning { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.28); }
+.imgup-modal-warning-title, .dlm-warning-title { font: 700 14.5px/1.3 var(--font); letter-spacing: .02em; text-transform: uppercase; }
+.imgup-modal-warning-title { color: var(--yellow); }
+.dlm-warning-title { color: var(--red); }
+.imgup-modal-warning-sub, .dlm-warning-sub { font-size: 13.5px; color: var(--dim); margin-top: 4px; }
+
+.imgup-modal-rules-label, .dlm-rules-label { font: 600 11px/1 var(--font); letter-spacing: .16em; text-transform: uppercase; margin-bottom: 6px; color: var(--dim); }
+.imgup-modal-rule, .dlm-rule {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14.5px; line-height: 1.5; color: var(--dim);
+}
+.imgup-modal-rule:last-of-type, .dlm-rule:last-of-type { border-bottom: none; }
+.imgup-modal-rule.highlight, .dlm-rule.highlight { color: var(--ink); font-weight: 500; }
+.imgup-y { color: var(--yellow); font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+.dlm-x { color: var(--red); font-size: 12px; flex-shrink: 0; margin-top: 3px; opacity: .8; }
+.dlm-rule.highlight .dlm-x { opacity: 1; }
+
+.imgup-modal-footer, .dlm-footer { margin-top: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.imgup-modal-checkbox-wrap, .dlm-checkbox-wrap {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--dim);
+  cursor: pointer; user-select: none;
+}
+.imgup-modal-checkbox-wrap input[type=checkbox], .dlm-checkbox-wrap input[type=checkbox] {
+  width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+}
+.imgup-modal-btn-confirm, .dlm-btn-confirm {
+  flex: 1; min-width: 200px; background: var(--accent); color: #fff; border: none;
+  padding: 14px 20px;
+  font: 600 15px/1 var(--font);
+  cursor: pointer;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px -8px rgba(255,77,166,.6);
+  transition: background .2s, transform .15s, opacity .2s;
+}
+.imgup-modal-btn-confirm:hover, .dlm-btn-confirm:hover { background: var(--accent-light); transform: translateY(-1px); }
+.imgup-modal-btn-confirm:disabled, .dlm-btn-confirm:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+/* ── SNEAK PEEKS (Dev) ── */
+.peeks-section { border: 1px solid rgba(255,77,166,.25); background: var(--panel); border-radius: var(--radius); padding: 26px; margin-bottom: 24px; }
+.peek-select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238B8B90' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 14px; }
+.peek-item-media { width: 100%; max-height: 260px; object-fit: cover; border-radius: 10px; margin-top: 12px; display: block; }
+@media(max-width: 860px) { .peeks-section { padding: 20px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+<canvas id="bg-canvas"></canvas>
+<div class="noise"></div>
+<div class="top-glow"></div>
+<div id="toast"></div>
+
+<!-- DOWNLOAD MODAL -->
+<div id="dl-modal-overlay">
+  <div id="dl-modal">
+    <button class="dlm-close" id="dlm-close">✕</button>
+
+    <div class="dlm-header">
+      <div class="dlm-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div>
+        <div class="dlm-title">Read Before Downloading</div>
+        <div class="dlm-sub">Your license is checked on every launch.</div>
+      </div>
+    </div>
+
+    <div class="dlm-warning">
+      <div class="dlm-warning-title">ANY VIOLATION = LICENSE REVOKED + PERMANENT BAN</div>
+      <div class="dlm-warning-sub">Instant. No warnings. No second chances.</div>
+    </div>
+
+    <div class="dlm-rules-label">Bannable offenses</div>
+
+    <div class="dlm-rule highlight">
+      <span class="dlm-x">✕</span>
+      <span>SHARING OR RESELLING THIS FILE. Redistribution, leaking to others, or uploading anywhere. All of it.</span>
+    </div>
+    <div class="dlm-rule">
+      <span class="dlm-x">✕</span>
+      <span>Sharing your license key with anyone — keys are single-user only.</span>
+    </div>
+    <div class="dlm-rule">
+      <span class="dlm-x">✕</span>
+      <span>Reverse engineering, decompiling, or modifying the client.</span>
+    </div>
+    <div class="dlm-rule">
+      <span class="dlm-x">✕</span>
+      <span>Using on more than one machine without an HWID reset.</span>
+    </div>
+    <div class="dlm-rule">
+      <span class="dlm-x">✕</span>
+      <span>Charging back or disputing your payment after downloading.</span>
+    </div>
+
+    <div class="dlm-footer">
+      <label class="dlm-checkbox-wrap">
+        <input type="checkbox" id="dlm-check"> Don't show this again
+      </label>
+      <button class="dlm-btn-confirm" id="dlm-confirm">I Understand. Download.</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE UPLOAD MODAL -->
+<div id="imgup-modal-overlay">
+  <div id="imgup-modal">
+    <button class="imgup-modal-close" id="imgup-modal-close">✕</button>
+
+    <div class="imgup-modal-header">
+      <div class="imgup-modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div>
+        <div class="imgup-modal-title">Before You Upload</div>
+        <div class="imgup-modal-sub">Images are posted publicly in our Discord server.</div>
+      </div>
+    </div>
+
+    <div class="imgup-modal-warning">
+      <div class="imgup-modal-warning-title">INAPPROPRIATE UPLOADS = INSTANT BAN</div>
+      <div class="imgup-modal-warning-sub">No appeals. We log your Discord ID on every upload.</div>
+    </div>
+
+    <div class="imgup-modal-rules-label">Upload rules</div>
+
+    <div class="imgup-modal-rule highlight">
+      <span class="imgup-y">⚠</span>
+      <span>NSFW, hateful, or offensive content is an instant permanent ban — no exceptions.</span>
+    </div>
+    <div class="imgup-modal-rule">
+      <span class="imgup-y">⚠</span>
+      <span>Only upload screenshots related to Zynth Client. Off-topic images will be removed.</span>
+    </div>
+    <div class="imgup-modal-rule">
+      <span class="imgup-y">⚠</span>
+      <span>Don't include personal info (real names, addresses, IPs) in your screenshots.</span>
+    </div>
+    <div class="imgup-modal-rule">
+      <span class="imgup-y">⚠</span>
+      <span>Max 3 images per submission · PNG/JPG/GIF only · 8MB per file.</span>
+    </div>
+
+    <div class="imgup-modal-footer">
+      <label class="imgup-modal-checkbox-wrap">
+        <input type="checkbox" id="imgup-modal-check"> Don't show this again
+      </label>
+      <button class="imgup-modal-btn-confirm" id="imgup-modal-confirm">I Understand. Upload.</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <nav id="navbar">
+    <a class="nav-logo" href="index.html">
+      <div class="hex"><img src="zynth-logo.png" alt=""></div>ZYNTH<small>CLIENT</small>
+    </a>
+    <button class="btn-burger" id="btn-burger" aria-label="Menu" aria-expanded="false" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </nav>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <div class="app-shell">
+    <aside class="dashboard-sidebar" id="dashboard-sidebar" style="display:none">
+      <div class="sidebar-user">
+        <img class="nav-avatar" id="nav-avatar" src="" alt="">
+        <div class="sidebar-user-info">
+          <span class="nav-username" id="nav-username"></span>
+          <span class="sidebar-user-tag">Member</span>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <button class="menu-item active" data-tab="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Dashboard
+        </button>
+        <button class="menu-item" data-tab="reviews">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 17.3l-5.4 3 1-6-4.6-4.2 6.1-.6L12 3.5l2.9 5.9 6.1.6-4.6 4.2 1 6z"/></svg>
+          Reviews
+        </button>
+        <button class="menu-item" data-tab="clips">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Clips
+        </button>
+        <button class="menu-item" data-tab="peeks" id="menu-peeks" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          Sneak Peeks
+        </button>
+      </div>
+
+      <button class="btn-ghost sidebar-logout" id="btn-logout">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log out
+      </button>
+    </aside>
+
+  <main>
+    <!-- LOGIN -->
+    <div class="screen-login" id="screen-login">
+      <div class="badge"><span class="badge-dot"></span> Members only</div>
+      <h1 class="hero-title">Your<br><em>Dashboard</em></h1>
+      <p class="hero-sub">Connect your Discord account to access your license, downloads, and account settings.</p>
+      <a class="btn-discord" href="#" id="btn-login">
+        <svg viewBox="0 0 71 55" xmlns="http://www.w3.org/2000/svg"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.8a.2.2 0 0 0-.2.1c-.6 1.1-1.3 2.6-1.8 3.7a54.1 54.1 0 0 0-16.2 0 38 38 0 0 0-1.8-3.7.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7v.1a58.8 58.8 0 0 0 17.9 9 .2.2 0 0 0 .2-.1c1.4-1.9 2.6-3.9 3.7-5.9a.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.9a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.4 0a.2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .4 36 36 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 42.6 42.6 0 0 0 3.7 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.9-9v-.1C73 29.1 69.7 16.3 60.2 5zm-41.7 30.8c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.4 3.2 6.4 7.2 0 4-2.8 7.2-6.4 7.2zm23.7 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.4 3.2 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
+        Login with Discord
+      </a>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="screen-dashboard" style="display:none">
+
+    <!-- TAB: DASHBOARD -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Welcome back</div>
+        <h1 class="dash-title">Hey, <em id="dash-name">Player</em></h1>
+      </div>
+
+      <div class="license-panel">
+      <div class="status-row">
+        <div class="stat-cell">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6z"/></svg></div>
+          <div class="stat-label">License Status</div>
+          <div id="dash-status-pill" class="status-pill none">
+            <span class="pill-dot"></span>
+            <span id="dash-status-text">No License</span>
+          </div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+          <div class="stat-label">Plan</div>
+          <div class="stat-val" id="dash-plan">—</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+          <div class="stat-label">Expires</div>
+          <div class="stat-val" id="dash-expires">—</div>
+          <div class="bar-wrap" id="dash-bar-wrap" style="display:none">
+            <div class="bar-track"><div class="bar-fill" id="dash-bar-fill" style="width:0%"></div></div>
+            <div class="bar-sub" id="dash-bar-sub"></div>
+          </div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+          <div class="stat-label">Member Since</div>
+          <div class="stat-val" id="dash-since">—</div>
+        </div>
+      </div>
+
+      <div class="key-row" id="key-row" style="display:none">
+        <div class="key-inner">
+          <div class="key-label-sm">License Key</div>
+          <div class="key-val" id="dash-key">•••••-••••-••••-••••-••••</div>
+        </div>
+        <div class="key-btns">
+          <button class="key-btn" id="btn-reveal">Reveal</button>
+          <button class="key-btn" id="btn-copy">Copy</button>
+        </div>
+      </div>
+      </div>
+
+      <div class="dl-hero" id="dl-hero">
+        <div class="dl-hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <span class="card-tag">Latest Build</span>
+        <div class="dl-hero-title">Download Zynth</div>
+        <div class="dl-hero-desc" id="dl-desc">Activate a license below to unlock your download.</div>
+        <a class="btn-dl locked" id="btn-download">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .jar
+        </a>
+      </div>
+
+      <div class="cards">
+        <div class="card accent-discord">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <span class="card-tag">Support</span>
+          <div class="card-title">Discord Server</div>
+          <div class="card-desc">Open a ticket and get help from our team in under 24 hours.</div>
+          <a class="card-cta" href="https://discord.com/invite/Xa6BaUTgVs" target="_blank">
+            Join Server
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="card accent-docs">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <span class="card-tag">Reference</span>
+          <div class="card-title">Documentation</div>
+          <div class="card-desc">Setup guide, module list, keybind reference, and FAQ.</div>
+          <a class="card-cta" href="#" target="_blank">Read Docs <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="card accent-billing">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+          <span class="card-tag">Billing</span>
+          <div class="card-title">Manage Account</div>
+          <div class="card-desc">Renewal options, invoice history, and subscription settings.</div>
+          <a class="card-cta" href="https://sellauth.com" target="_blank">Open Billing <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+
+      <div class="redeem-section" id="redeem-section">
+        <div class="redeem-section-header">
+          <div>
+            <div class="redeem-section-title">Activate License</div>
+            <div class="redeem-section-sub">Enter the license key from your Discord ticket to unlock your download.</div>
+          </div>
+          <a class="btn-ghost" href="index.html#pricing" style="white-space:nowrap;flex-shrink:0">Buy a Key →</a>
+        </div>
+        <div class="redeem-inner">
+          <input class="redeem-input" id="key-input" type="text" placeholder="BLZMN-XXXX-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
+          <button class="btn-redeem" id="btn-redeem">Activate</button>
+        </div>
+        <div class="redeem-msg" id="redeem-msg"></div>
+      </div>
+
+      <!-- HWID RESET SECTION -->
+      <div class="hwid-section" id="hwid-section">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:20px;">
+          <div>
+            <div class="hwid-section-title">HWID Reset</div>
+            <div class="hwid-section-sub">Locked to a new PC? Reset your hardware ID below.<br>You get <strong>2 resets per calendar month</strong>. Resets refresh on the 1st.</div>
+          </div>
+        </div>
+        <div class="hwid-dots">
+          <div class="hwid-dot" id="hwid-dot-1"></div>
+          <div class="hwid-dot" id="hwid-dot-2"></div>
+        </div>
+        <div class="hwid-info" id="hwid-info">Loading reset info...</div>
+        <button class="btn-hwid-reset" id="btn-hwid-reset" disabled>Reset HWID</button>
+        <div class="hwid-msg" id="hwid-msg"></div>
+      </div>
+
+      <!-- DEV-ONLY: STAFF ACTIVITY LOG -->
+      <div class="hwid-section" id="staff-log-section" style="display:none">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:20px;">
+          <div>
+            <div class="hwid-section-title">👑 Staff Activity Log <span class="access-badge dev" style="margin-left:6px;">Dev Only</span></div>
+            <div class="hwid-section-sub">Every license revoke + ban "Execute" action, newest first. Use this to check whether a Staff member is abusing the power.</div>
+          </div>
+        </div>
+        <div class="review-list" id="staff-log-list"></div>
+      </div>
+    </div>
+    <!-- /TAB: DASHBOARD -->
+
+    <!-- TAB: REVIEWS -->
+    <div class="tab-panel" id="tab-reviews" style="display:none">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Community</div>
+        <h1 class="dash-title">Leave a <em>Review</em></h1>
+      </div>
+
+      <div class="mod-warning">
+        <div class="mod-warning-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div>
+          <div class="mod-warning-title">Everything posted here is moderated</div>
+          <div class="mod-warning-text">Reviews are visible to the whole community and our staff. Hate speech, harassment, slurs, spam, and other rule-breaking content is not tolerated. <strong>Violations result in an immediate license revocation and a permanent ban</strong> — no warnings.</div>
+        </div>
+      </div>
+
+      <div class="locked-notice" id="reviews-locked-notice">
+        <div class="locked-notice-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="locked-notice-title">License required</div>
+        <div class="locked-notice-sub">Activate a license to leave a review.</div>
+      </div>
+
+      <!-- ON-SITE REVIEW LIST -->
+      <div id="reviews-list-wrap" style="display:none">
+        <div class="list-header">
+          <div class="list-header-title">All Reviews</div>
+          <div id="reviews-access-badges"></div>
+        </div>
+        <div class="review-list" id="review-list"></div>
+      </div>
+
+      <!-- REVIEW SECTION -->
+      <div class="review-section" id="review-section">
+        <div class="review-section-title" id="review-section-title">Leave a Review</div>
+        <div class="review-section-sub" id="review-section-sub">Share your experience with Zynth Client. Reviews are posted here and in our Discord server for the community to see. You can post a new review once every 15 days, but you can edit your existing one anytime.</div>
+        <div class="review-cooldown-note" id="review-cooldown-note" style="display:none"></div>
+        <div class="review-stars" id="review-stars">
+          <button class="star-btn" data-star="1">★</button>
+          <button class="star-btn" data-star="2">★</button>
+          <button class="star-btn" data-star="3">★</button>
+          <button class="star-btn" data-star="4">★</button>
+          <button class="star-btn" data-star="5">★</button>
+        </div>
+        <textarea class="review-textarea" id="review-text" placeholder="Tell others what you think about Zynth Client..." maxlength="500"></textarea>
+        <div class="review-char-count"><span id="review-char-used">0</span>/500</div>
+        <label class="anon-row" for="review-anon">
+          <input type="checkbox" id="review-anon"> Post anonymously (your name is still visible to Staff/Dev)
+        </label>
+        <button class="btn-review" id="btn-review">Submit Review</button>
+        <button class="btn-own-edit" id="btn-review-cancel" style="display:none;margin-left:8px;">Cancel Edit</button>
+        <div class="review-msg" id="review-msg"></div>
+      </div>
+    </div>
+    <!-- /TAB: REVIEWS -->
+
+    <!-- TAB: CLIPS -->
+    <div class="tab-panel" id="tab-clips" style="display:none">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Showcase</div>
+        <h1 class="dash-title">Share a <em>Clip</em></h1>
+      </div>
+
+      <div class="mod-warning">
+        <div class="mod-warning-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div>
+          <div class="mod-warning-title">Everything posted here is moderated</div>
+          <div class="mod-warning-text">Clips are visible to the whole community and our staff. NSFW content, hate speech, harassment, and other rule-breaking uploads are not tolerated. <strong>Violations result in an immediate license revocation and a permanent ban</strong> — no warnings.</div>
+        </div>
+      </div>
+
+      <div class="locked-notice" id="clips-locked-notice">
+        <div class="locked-notice-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="locked-notice-title">License required</div>
+        <div class="locked-notice-sub">Activate a license to share screenshots and clips.</div>
+      </div>
+
+      <!-- ON-SITE CLIP LIST -->
+      <div id="clips-list-wrap" style="display:none">
+        <div class="list-header">
+          <div class="list-header-title">All Clips</div>
+          <div id="clips-access-badges"></div>
+        </div>
+        <div class="clip-grid" id="clip-grid"></div>
+      </div>
+
+      <!-- IMAGE UPLOAD SECTION -->
+      <div class="imgup-section" id="imgup-section">
+        <div class="imgup-section-title" id="imgup-section-title">Share a Screenshot</div>
+        <div class="imgup-section-sub" id="imgup-section-sub">Upload screenshots or GIFs of Zynth Client in action. They'll be posted here and in our Discord showcase channel.</div>
+        <div class="imgup-drop" id="imgup-drop">
+          <input type="file" id="imgup-file" accept="image/png,image/jpeg,image/gif" multiple>
+          <div class="imgup-drop-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <div class="imgup-drop-label"><strong>Click to browse</strong> or drag & drop<br>PNG · JPG · GIF · up to 8MB each · max 3 files</div>
+        </div>
+        <div class="imgup-preview" id="imgup-preview"></div>
+        <input class="imgup-caption" id="imgup-caption" type="text" placeholder="Optional caption..." maxlength="120">
+        <label class="anon-row" for="imgup-anon">
+          <input type="checkbox" id="imgup-anon"> Post anonymously (your name is still visible to Staff/Dev)
+        </label>
+        <button class="btn-imgup" id="btn-imgup">Send to Discord</button>
+        <button class="btn-own-edit" id="btn-imgup-cancel" style="display:none;margin-left:8px;">Cancel Edit</button>
+        <div class="imgup-msg" id="imgup-msg"></div>
+      </div>
+    </div>
+    <!-- /TAB: CLIPS -->
+
+    <!-- TAB: SNEAK PEEKS (Dev only) -->
+    <div class="tab-panel" id="tab-peeks" style="display:none">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Dev only</div>
+        <h1 class="dash-title">Sneak <em>Peeks</em></h1>
+      </div>
+
+      <div class="peeks-section">
+        <div class="redeem-section-title">Post a sneak peek</div>
+        <div class="redeem-section-sub" style="margin-bottom:18px">Shows up on the Sneak Peeks page of the website straight away.</div>
+        <input class="imgup-caption" id="peek-title" type="text" placeholder="Title, e.g. New Radial GUI animations" maxlength="80">
+        <select class="imgup-caption peek-select" id="peek-tag">
+          <option>Coming soon</option>
+          <option selected>In progress</option>
+          <option>Done</option>
+        </select>
+        <textarea class="review-textarea" id="peek-text" placeholder="What is it? Keep it short." maxlength="600"></textarea>
+        <div class="imgup-drop" id="peek-drop">
+          <input type="file" id="peek-file" accept="image/png,image/jpeg,image/gif,video/mp4,video/webm">
+          <div class="imgup-drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+          <div class="imgup-drop-label" id="peek-drop-label"><strong>Add an image or video</strong> (optional)<br>PNG · JPG · GIF · MP4 · WEBM</div>
+        </div>
+        <button class="btn-imgup" id="btn-peek-post">Post sneak peek</button>
+        <div class="imgup-msg" id="peek-msg"></div>
+      </div>
+
+      <div class="list-header"><div class="list-header-title">Posted</div></div>
+      <div class="review-list" id="peek-list"></div>
+    </div>
+    <!-- /TAB: SNEAK PEEKS -->
+
+    </div>
+
+  </main>
+  </div>
+
+  <footer>
+    <a class="footer-logo" href="index.html"><div class="hex"><img src="zynth-logo.png" alt=""></div>ZYNTH<small>CLIENT</small></a>
+    <span class="footer-copy">© 2026 Zynth Client · All rights reserved</span>
+  </footer>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+const DISCORD_CLIENT_ID = '1511344894290170046';
+// Discord sends people straight back to this dashboard page (no separate /callback page).
+// This exact URL must be listed under OAuth2 → Redirects in the Discord Developer Portal.
+const REDIRECT_URI      = window.location.origin + window.location.pathname;
+const API_URL            = 'https://blizzardapi.exasty.workers.dev';
+
+// ── CURSOR ────────────────────────────────────────────────────
+const $cursor = document.getElementById('cursor');
+const $trail  = document.getElementById('cursor-trail');
+document.addEventListener('mousemove', e => {
+  $cursor.style.left = e.clientX + 'px'; $cursor.style.top = e.clientY + 'px';
+  $trail.style.left  = e.clientX + 'px'; $trail.style.top  = e.clientY + 'px';
+});
+
+// ── CANVAS BG ─────────────────────────────────────────────────
+const canvas = document.getElementById('bg-canvas');
+const ctx    = canvas.getContext('2d');
+let W, H, pts = [];
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+resize(); window.addEventListener('resize', resize);
+class P {
+  constructor() { this.reset(); }
+  reset() { this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-.5)*.28;this.vy=(Math.random()-.5)*.28;this.r=Math.random()*1+.3;this.a=Math.random()*.35+.04; }
+  step() { this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset(); }
+  draw() { ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=`rgba(44,111,168,${this.a})`;ctx.fill(); }
+}
+for(let i=0;i<90;i++) pts.push(new P());
+(function loop(){
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);if(d<90){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(44,111,168,${.05*(1-d/90)})`;ctx.lineWidth=.4;ctx.stroke();}}
+  pts.forEach(p=>{p.step();p.draw();});
+  requestAnimationFrame(loop);
+})();
+
+window.addEventListener('scroll', () =>
+  document.getElementById('navbar').classList.toggle('scrolled', scrollY > 50));
+
+// ── TOAST ─────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ── SCREENS ───────────────────────────────────────────────────
+function showLogin()     { document.getElementById('screen-login').style.display = 'flex'; document.getElementById('screen-dashboard').style.display = 'none'; }
+function showDashboard() { document.getElementById('screen-login').style.display = 'none'; document.getElementById('screen-dashboard').style.display = 'block'; }
+
+// ── SIDEBAR / TABS ────────────────────────────────────────────
+const TABS = ['dashboard', 'reviews', 'clips', 'peeks'];
+
+function switchTab(tab) {
+  TABS.forEach(t => {
+    document.getElementById('tab-' + t).style.display = (t === tab) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.menu-item').forEach(el =>
+    el.classList.toggle('active', el.dataset.tab === tab)
+  );
+  closeBurger();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openBurger()  { document.getElementById('dashboard-sidebar').classList.add('open');  document.getElementById('sidebar-backdrop').classList.add('open');  document.getElementById('btn-burger').classList.add('open'); document.getElementById('btn-burger').setAttribute('aria-expanded', 'true'); }
+function closeBurger() { document.getElementById('dashboard-sidebar').classList.remove('open'); document.getElementById('sidebar-backdrop').classList.remove('open'); document.getElementById('btn-burger').classList.remove('open'); document.getElementById('btn-burger').setAttribute('aria-expanded', 'false'); }
+function toggleBurger() { document.getElementById('dashboard-sidebar').classList.contains('open') ? closeBurger() : openBurger(); }
+
+document.getElementById('btn-burger').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleBurger();
+});
+document.querySelectorAll('.menu-item').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+document.getElementById('sidebar-backdrop').addEventListener('click', closeBurger);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBurger(); });
+
+// ── DISCORD LOGIN URL ─────────────────────────────────────────
+const DISCORD_LOGIN_URL =
+  `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}` +
+  `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+document.getElementById('btn-login').href = DISCORD_LOGIN_URL;
+
+// Random value sent to Discord and checked when it comes back, so a link with someone
+// else's token can't log you in. Made when the login button is clicked.
+document.getElementById('btn-login').addEventListener('click', () => {
+  const state = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+  localStorage.setItem('zynth_oauth_state', state);
+  document.getElementById('btn-login').href = `${DISCORD_LOGIN_URL}&state=${state}`;
+});
+
+// Coming back from Discord: the token is in the URL after "#". Save it the same way the
+// old /callback page did, then clean the URL so the token isn't left in the address bar.
+function takeTokenFromUrl() {
+  if (!location.hash.includes('access_token') && !location.hash.includes('error')) return;
+  const params   = new URLSearchParams(location.hash.slice(1));
+  const token    = params.get('access_token');
+  const expected = localStorage.getItem('zynth_oauth_state');
+  localStorage.removeItem('zynth_oauth_state');
+  history.replaceState(null, '', location.pathname + location.search);
+  if (params.get('error')) { toast('Discord login was cancelled.', 'red'); return; }
+  if (token && expected && params.get('state') === expected) localStorage.setItem('blizz_dc_token', token);
+  else if (token) toast('Login check failed. Please try again.', 'red');
+}
+
+// ── LOAD DISCORD USER ─────────────────────────────────────────
+async function loadDiscordUser(token) {
+  const res = await fetch('https://discord.com/api/users/@me', {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  if (!res.ok) throw new Error('invalid token');
+  return res.json();
+}
+
+// ── GLOBAL STATE (used by reviews/clips + revoke) ───────────────
+let CURRENT_USER   = null; // { id, username, avatar, ... }
+let CURRENT_LIC    = null; // { key, plan, expires_at, ... }
+let CURRENT_ACCESS = { is_staff: false, is_dev: false };
+
+// ── RENDER DASHBOARD ──────────────────────────────────────────
+async function renderDashboard(user) {
+  document.getElementById('dash-name').textContent = user.global_name || user.username;
+
+  document.getElementById('nav-avatar').src = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+    : `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(user.id) % 6n)}.png`;
+  document.getElementById('nav-username').textContent = user.username;
+  document.getElementById('dashboard-sidebar').style.display = 'flex';
+  document.getElementById('btn-burger').style.display = 'flex';
+  switchTab('dashboard');
+
+  showDashboard();
+  CURRENT_USER = user;
+
+  // ── Check API for existing license ──
+  try {
+    const res  = await fetch(`${API_URL}/license/${user.id}`);
+    const data = await res.json();
+    if (data.has_license) {
+      applyLicense(data.license, user);
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not reach API to check license:', e.message);
+    // Fall through — show redeem section anyway
+  }
+
+  setupRedeem(user);
+  // Even without a license, show the public review/clip lists (redacted).
+  loadReviews(); loadClips();
+}
+
+// ── APPLY LICENSE TO UI ───────────────────────────────────────
+function applyLicense(lic, user) {
+  const isExpired = lic.expired || (!['lifetime','dev','staff'].includes(lic.plan) && lic.expires_at && new Date(lic.expires_at) < new Date());
+
+  const pill = document.getElementById('dash-status-pill');
+  pill.className = 'status-pill ' + (isExpired ? 'expired' : 'active');
+  document.getElementById('dash-status-text').textContent = isExpired ? 'Expired' : 'Active';
+
+  const planLabels = { lifetime: '🌟 Lifetime', monthly: '📅 Monthly', dev: '👑 Dev', staff: '🛠️ Staff' };
+  document.getElementById('dash-plan').textContent = planLabels[lic.plan] || lic.plan;
+
+  let expiresText = 'Never';
+  if (!['lifetime','dev','staff'].includes(lic.plan) && lic.expires_at) {
+    const exp      = new Date(lic.expires_at);
+    const diff     = Math.max(0, exp - Date.now());
+    const daysLeft = Math.ceil(diff / 86400000);
+    expiresText    = exp.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const pct      = Math.min(100, Math.max(0, (daysLeft / 30) * 100));
+    document.getElementById('dash-bar-wrap').style.display = 'block';
+    document.getElementById('dash-bar-sub').textContent = `${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining`;
+    setTimeout(() => document.getElementById('dash-bar-fill').style.width = pct + '%', 400);
+  }
+  document.getElementById('dash-expires').textContent = expiresText;
+
+  if (lic.redeemed_at) {
+    const d = new Date(lic.redeemed_at);
+    document.getElementById('dash-since').textContent =
+      d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+  }
+
+  // Key row
+  const fullKey = lic.key;
+  const masked  = fullKey.slice(0, 5) + '-••••-••••-••••-••••';
+  const keyEl   = document.getElementById('dash-key');
+  keyEl.textContent = masked;
+  keyEl.dataset.full = fullKey; keyEl.dataset.masked = masked; keyEl.dataset.shown = '0';
+  document.getElementById('key-row').style.display = 'flex';
+
+  document.getElementById('btn-reveal').onclick = () => {
+    const shown = keyEl.dataset.shown === '1';
+    keyEl.textContent = shown ? keyEl.dataset.masked : keyEl.dataset.full;
+    keyEl.dataset.shown = shown ? '0' : '1';
+    document.getElementById('btn-reveal').textContent = shown ? 'Reveal' : 'Hide';
+  };
+  document.getElementById('btn-copy').onclick = () => {
+    navigator.clipboard.writeText(fullKey).then(() => {
+      document.getElementById('btn-copy').textContent = 'Copied!';
+      setTimeout(() => document.getElementById('btn-copy').textContent = 'Copy', 2000);
+    });
+  };
+
+  // Unlock download — passes discord_id + key as query params for server-side auth
+  if (!isExpired && user) {
+    const dlBtn = document.getElementById('btn-download');
+    dlBtn.classList.remove('locked');
+    dlBtn.href = `${API_URL}/download/blizzard-1.0.0.jar?discord_id=${encodeURIComponent(user.id)}&key=${encodeURIComponent(fullKey)}`;
+    document.getElementById('dl-desc').textContent = 'Fabric 1.21.11 · Needs Fabric API and Java 21+';
+  }
+
+  // Show renew button if expired
+  if (isExpired) {
+    document.getElementById('redeem-section').style.display = 'block';
+    document.querySelector('.redeem-section-title').textContent = 'Renew License';
+    document.querySelector('.redeem-section-sub').textContent = 'Your license has expired. Enter a new key to renew.';
+  } else {
+    document.getElementById('redeem-section').style.display = 'none';
+  }
+
+  CURRENT_LIC = lic;
+
+  if (user) { try { setupRedeem(user); } catch (e) { console.error('setupRedeem failed:', e); } }
+  if (user) { try { loadHWIDStatus(user, lic); setupHWIDReset(user, lic); } catch (e) { console.error('HWID setup failed:', e); } }
+  if (user) { try { setupReviews(user, lic); } catch (e) { console.error('setupReviews failed:', e); } }
+  if (user) { try { setupImageUpload(user, lic); } catch (e) { console.error('setupImageUpload failed:', e); } }
+
+  // Resolve staff/dev access, then load reviews/clips with that context.
+  fetchAccess(user, lic).then(() => { loadReviews(); loadClips(); });
+}
+
+// ── ACCESS (Staff / Dev) ─────────────────────────────────────
+async function fetchAccess(user, lic) {
+  try {
+    const res  = await fetch(`${API_URL}/access/${user.id}?key=${encodeURIComponent(lic.key)}`);
+    const data = await res.json();
+    CURRENT_ACCESS = { is_staff: !!data.is_staff, is_dev: !!data.is_dev };
+  } catch (e) {
+    CURRENT_ACCESS = { is_staff: false, is_dev: false };
+  }
+  const logSection = document.getElementById('staff-log-section');
+  if (logSection) {
+    logSection.style.display = CURRENT_ACCESS.is_dev ? 'block' : 'none';
+    if (CURRENT_ACCESS.is_dev) loadStaffActions();
+  }
+  if (typeof setupPeeksAccess === "function") setupPeeksAccess();
+}
+
+async function loadStaffActions() {
+  const list = document.getElementById('staff-log-list');
+  if (!list || !CURRENT_USER || !CURRENT_LIC) return;
+  try {
+    const res = await fetch(`${API_URL}/dev/actions?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`);
+    const data = await res.json();
+    if (!res.ok) { list.innerHTML = `<div class="empty-note">${escapeHtml(data.error || 'Could not load log.')}</div>`; return; }
+    const actions = data.actions || [];
+    if (!actions.length) { list.innerHTML = `<div class="empty-note">No Execute actions logged yet.</div>`; return; }
+
+    list.innerHTML = actions.map(a => {
+      const roleBadge = a.actor_role === 'dev' ? `<span class="access-badge dev">👑 dev</span>` : `<span class="access-badge staff">🛠️ staff</span>`;
+      const when = new Date(a.created_at).toLocaleString();
+      return `
+        <div class="review-item">
+          <div class="review-item-top">
+            <div class="review-item-user">
+              <span class="review-item-name">${escapeHtml(a.actor_username || 'Unknown')} (<code>${escapeHtml(a.actor_discord_id)}</code>)</span>
+              ${roleBadge}
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim2);">${when}</span>
+          </div>
+          <div class="review-item-text">
+            Executed on target <code>${escapeHtml(a.target_discord_id)}</code> — key ${a.key_revoked ? `<code>${escapeHtml(a.key_revoked)}</code>` : 'none on file'}, banned: ${a.banned ? 'yes' : 'no'}.
+            ${a.reason ? `<br>Reason: ${escapeHtml(a.reason)}` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="empty-note">Could not reach server: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderAccessBadges(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  if (CURRENT_ACCESS.is_dev)   el.insertAdjacentHTML('beforeend', `<span class="access-badge dev">👑 Dev View</span>`);
+  else if (CURRENT_ACCESS.is_staff) el.insertAdjacentHTML('beforeend', `<span class="access-badge staff">🛠️ Staff View</span>`);
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function avatarUrlFor(discord_id, avatar) {
+  if (discord_id && avatar) return `https://cdn.discordapp.com/avatars/${discord_id}/${avatar}.png?size=64`;
+  return 'https://cdn.discordapp.com/embed/avatars/0.png';
+}
+
+// ── DEV: REVOKE + BAN ────────────────────────────────────────
+async function revokeUser(targetDiscordId, btn) {
+  if (!CURRENT_USER || !CURRENT_LIC) return;
+  if (!confirm(`Revoke this user's license and PERMANENTLY BAN them from the Discord server?\n\nDiscord ID: ${targetDiscordId}\n\nThis cannot be undone.`)) return;
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Executing…'; }
+  try {
+    const res = await fetch(`${API_URL}/dev/revoke`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requester_discord_id: CURRENT_USER.id,
+        requester_key: CURRENT_LIC.key,
+        requester_username: CURRENT_USER.username,
+        target_discord_id: targetDiscordId,
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      toast('License revoked and user banned.', 'green');
+      loadReviews(); loadClips();
+    } else {
+      toast(result.error || `Failed to execute (${res.status}).`, 'red');
+      if (btn) { btn.disabled = false; btn.textContent = 'Execute'; }
+    }
+  } catch (e) {
+    toast('Could not reach server: ' + e.message, 'red');
+    if (btn) { btn.disabled = false; btn.textContent = 'Execute'; }
+  }
+}
+window.revokeUser = revokeUser;
+
+// ── REVIEWS: LOAD + RENDER ───────────────────────────────────
+let REVIEW_COOLDOWN_DAYS_LEFT = 0;
+let EDITING_REVIEW_ID = null;
+let ALL_REVIEWS = [];
+let REVIEW_SELECTED_STARS = 0;
+
+async function loadReviews() {
+  try {
+    const qs = (CURRENT_USER && CURRENT_LIC)
+      ? `?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`
+      : '';
+    const res  = await fetch(`${API_URL}/reviews${qs}`);
+    const data = await res.json();
+    CURRENT_ACCESS = { is_staff: !!data.is_staff, is_dev: !!data.is_dev };
+    REVIEW_COOLDOWN_DAYS_LEFT = data.cooldown_days_left || 0;
+    ALL_REVIEWS = data.reviews || [];
+    renderReviews(ALL_REVIEWS);
+    updateReviewCooldownUI();
+  } catch (e) {
+    console.warn('Could not load reviews:', e.message);
+  }
+}
+
+function updateReviewCooldownUI() {
+  const note = document.getElementById('review-cooldown-note');
+  const btn  = document.getElementById('btn-review');
+  if (!note || !btn) return;
+  if (EDITING_REVIEW_ID) { note.style.display = 'none'; return; } // cooldown doesn't apply to edits
+  if (REVIEW_COOLDOWN_DAYS_LEFT > 0) {
+    note.style.display = 'block';
+    note.textContent = `⏳ You can post a new review in ${REVIEW_COOLDOWN_DAYS_LEFT} day${REVIEW_COOLDOWN_DAYS_LEFT !== 1 ? 's' : ''}. You can still edit your existing review below.`;
+  } else {
+    note.style.display = 'none';
+  }
+}
+
+function renderReviews(reviews) {
+  const wrap = document.getElementById('reviews-list-wrap');
+  const list = document.getElementById('review-list');
+  wrap.style.display = 'block';
+  renderAccessBadges('reviews-access-badges');
+
+  if (!reviews.length) {
+    list.innerHTML = `<div class="empty-note">No reviews yet — be the first!</div>`;
+    return;
+  }
+
+  list.innerHTML = reviews.map(r => {
+    const stars = '★'.repeat(r.stars) + '☆'.repeat(5 - r.stars);
+    const canRevoke = CURRENT_ACCESS.is_staff && r.discord_id && !r.is_mine;
+    return `
+      <div class="review-item">
+        <div class="review-item-top">
+          <div class="review-item-user">
+            <img class="review-item-avatar" src="${avatarUrlFor(r.discord_id, r.avatar)}" alt="">
+            <span class="review-item-name">${escapeHtml(r.username)}${r.is_mine ? ' (you)' : ''}</span>
+          </div>
+          <span class="review-item-stars">${stars}</span>
+        </div>
+        <div class="review-item-text">${escapeHtml(r.text)}</div>
+        <div class="review-item-meta">
+          ${r.anonymous ? `<span class="${r.revealed_by_staff ? 'pill-revealed' : 'pill-anon'}">${r.revealed_by_staff ? '🕵️ anonymous — revealed for you' : '🕵️ anonymous'}</span>` : ''}
+          ${r.edited ? `<span class="pill-edited">✎ edited</span>` : ''}
+          ${r.is_mine ? `<button class="btn-own-edit" onclick="startEditReview(${r.id})">Edit</button><button class="btn-own-delete" onclick="deleteReview(${r.id}, this)">Delete</button>` : ''}
+          ${canRevoke ? `<button class="btn-revoke" onclick="revokeUser('${r.discord_id}', this)">Execute</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function startEditReview(id) {
+  const r = ALL_REVIEWS.find(x => x.id === id);
+  if (!r) return;
+  EDITING_REVIEW_ID = id;
+
+  REVIEW_SELECTED_STARS = r.stars;
+  const starBtns = document.querySelectorAll('.star-btn');
+  starBtns.forEach(s => s.classList.toggle('active', Number(s.dataset.star) <= r.stars));
+  document.getElementById('review-text').value = r.text;
+  document.getElementById('review-char-used').textContent = r.text.length;
+  document.getElementById('review-anon').checked = !!r.anonymous;
+  document.getElementById('review-section-title').textContent = 'Edit Your Review';
+  document.getElementById('review-section-sub').textContent = 'Update your existing review — this does not count against the 15-day posting limit.';
+  document.getElementById('btn-review').textContent = 'Update Review';
+  document.getElementById('btn-review-cancel').style.display = 'inline-block';
+  updateReviewCooldownUI();
+
+  document.getElementById('tab-reviews').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEditReview() {
+  EDITING_REVIEW_ID = null;
+  REVIEW_SELECTED_STARS = 0;
+  document.querySelectorAll('.star-btn').forEach(s => s.classList.remove('active'));
+  document.getElementById('review-text').value = '';
+  document.getElementById('review-char-used').textContent = '0';
+  document.getElementById('review-anon').checked = false;
+  document.getElementById('review-section-title').textContent = 'Leave a Review';
+  document.getElementById('review-section-sub').textContent = 'Share your experience with Zynth Client. Reviews are posted here and in our Discord server for the community to see. You can post a new review once every 15 days, but you can edit your existing one anytime.';
+  document.getElementById('btn-review').textContent = 'Submit Review';
+  document.getElementById('btn-review-cancel').style.display = 'none';
+  document.getElementById('review-msg').textContent = '';
+  updateReviewCooldownUI();
+}
+window.startEditReview = startEditReview;
+
+async function deleteReview(id, btn) {
+  if (!CURRENT_USER || !CURRENT_LIC) return;
+  if (!confirm('Delete this review? This cannot be undone.')) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+  try {
+    const res = await fetch(`${API_URL}/review/${id}?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (result.success) {
+      toast('Review deleted.', 'green');
+      if (EDITING_REVIEW_ID === id) cancelEditReview();
+      loadReviews();
+    } else {
+      toast(result.error || 'Failed to delete.', 'red');
+      if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+    }
+  } catch (e) {
+    toast('Could not reach server: ' + e.message, 'red');
+    if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+  }
+}
+window.deleteReview = deleteReview;
+
+// ── CLIPS: LOAD + RENDER ─────────────────────────────────────
+let ALL_CLIPS = [];
+let EDITING_CLIP_ID = null;
+
+async function loadClips() {
+  try {
+    const qs = (CURRENT_USER && CURRENT_LIC)
+      ? `?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`
+      : '';
+    const res  = await fetch(`${API_URL}/clips${qs}`);
+    const data = await res.json();
+    CURRENT_ACCESS = { is_staff: !!data.is_staff, is_dev: !!data.is_dev };
+    ALL_CLIPS = data.clips || [];
+    renderClips(ALL_CLIPS);
+  } catch (e) {
+    console.warn('Could not load clips:', e.message);
+  }
+}
+
+function renderClips(clips) {
+  const wrap = document.getElementById('clips-list-wrap');
+  const grid = document.getElementById('clip-grid');
+  wrap.style.display = 'block';
+  renderAccessBadges('clips-access-badges');
+
+  if (!clips.length) {
+    grid.innerHTML = `<div class="empty-note">No clips yet — be the first to share one!</div>`;
+    return;
+  }
+
+  grid.innerHTML = clips.map(c => {
+    const canRevoke = CURRENT_ACCESS.is_staff && c.discord_id && !c.is_mine;
+    const imgs = (c.image_urls || []).slice(0, 3).map(u => `<img src="${u}" alt="" loading="lazy">`).join('');
+    return `
+      <div class="clip-card">
+        <div class="clip-card-imgs">${imgs}</div>
+        <div class="clip-card-body">
+          <div class="clip-card-top">
+            <img class="clip-card-avatar" src="${avatarUrlFor(c.discord_id, c.avatar)}" alt="">
+            <span class="clip-card-name">${escapeHtml(c.username)}${c.is_mine ? ' (you)' : ''}</span>
+          </div>
+          ${c.caption ? `<div class="clip-card-caption">${escapeHtml(c.caption)}</div>` : ''}
+          <div class="clip-card-meta">
+            ${c.anonymous ? `<span class="${c.revealed_by_staff ? 'pill-revealed' : 'pill-anon'}">${c.revealed_by_staff ? '🕵️ anonymous — revealed for you' : '🕵️ anonymous'}</span>` : ''}
+            ${c.edited ? `<span class="pill-edited">✎ edited</span>` : ''}
+            ${c.is_mine ? `<button class="btn-own-edit" onclick="startEditClip(${c.id})">Edit</button><button class="btn-own-delete" onclick="deleteClip(${c.id}, this)">Delete</button>` : ''}
+            ${canRevoke ? `<button class="btn-revoke" onclick="revokeUser('${c.discord_id}', this)">Execute</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function startEditClip(id) {
+  const c = ALL_CLIPS.find(x => x.id === id);
+  if (!c) return;
+  EDITING_CLIP_ID = id;
+
+  document.getElementById('imgup-caption').value = c.caption || '';
+  document.getElementById('imgup-anon').checked = !!c.anonymous;
+  document.getElementById('imgup-drop').style.display = 'none';
+  document.getElementById('imgup-preview').innerHTML = '';
+  document.getElementById('imgup-section-title').textContent = 'Edit Your Clip';
+  document.getElementById('imgup-section-sub').textContent = 'Update the caption or anonymity on your clip. The images themselves can\'t be swapped — upload a new clip for that.';
+  document.getElementById('btn-imgup').textContent = 'Update Clip';
+  document.getElementById('btn-imgup-cancel').style.display = 'inline-block';
+  document.getElementById('imgup-msg').textContent = '';
+
+  document.getElementById('tab-clips').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEditClip() {
+  EDITING_CLIP_ID = null;
+  document.getElementById('imgup-caption').value = '';
+  document.getElementById('imgup-anon').checked = false;
+  document.getElementById('imgup-drop').style.display = '';
+  document.getElementById('imgup-section-title').textContent = 'Share a Screenshot';
+  document.getElementById('imgup-section-sub').textContent = 'Upload screenshots or GIFs of Zynth Client in action. They\'ll be posted here and in our Discord showcase channel.';
+  document.getElementById('btn-imgup').textContent = 'Send to Discord';
+  document.getElementById('btn-imgup-cancel').style.display = 'none';
+  document.getElementById('imgup-msg').textContent = '';
+}
+window.startEditClip = startEditClip;
+
+async function deleteClip(id, btn) {
+  if (!CURRENT_USER || !CURRENT_LIC) return;
+  if (!confirm('Delete this clip from the site? This cannot be undone. (The Discord post itself stays up.)')) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+  try {
+    const res = await fetch(`${API_URL}/clip/${id}?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (result.success) {
+      toast('Clip deleted.', 'green');
+      if (EDITING_CLIP_ID === id) cancelEditClip();
+      loadClips();
+    } else {
+      toast(result.error || 'Failed to delete.', 'red');
+      if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+    }
+  } catch (e) {
+    toast('Could not reach server: ' + e.message, 'red');
+    if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+  }
+}
+window.deleteClip = deleteClip;
+
+// ── HWID RESET ────────────────────────────────────────────────
+async function loadHWIDStatus(user, lic) {
+  const section = document.getElementById('hwid-section');
+  if (!lic || lic.expired) return; // don't show if no valid license
+  section.style.display = 'block';
+
+  try {
+    const res  = await fetch(`${API_URL}/hwid-status/${user.id}`);
+    const data = await res.json();
+
+    if (!data.found) return;
+
+    const used  = data.resets_used;
+    const left  = data.resets_left;
+    const bound = data.hwid_bound;
+
+    // Update dots
+    document.getElementById('hwid-dot-1').className = 'hwid-dot ' + (used >= 1 ? 'used' : 'empty');
+    document.getElementById('hwid-dot-2').className = 'hwid-dot ' + (used >= 2 ? 'used' : 'empty');
+
+    const infoEl = document.getElementById('hwid-info');
+    const btn    = document.getElementById('btn-hwid-reset');
+
+    if (!bound) {
+      infoEl.textContent = 'No HWID bound yet — will lock on first mod launch.';
+      btn.disabled = true;
+      return;
+    }
+
+    if (left <= 0) {
+      infoEl.textContent = `Both resets used this month. Resets on the 1st.`;
+      btn.disabled = true;
+    } else {
+      infoEl.textContent = `${used}/2 resets used this month · ${left} reset${left !== 1 ? 's' : ''} remaining`;
+      btn.disabled = false;
+    }
+  } catch (e) {
+    document.getElementById('hwid-info').textContent = 'Could not load reset info.';
+  }
+}
+
+function setupHWIDReset(user, lic) {
+  const btn = document.getElementById('btn-hwid-reset');
+  const msg = document.getElementById('hwid-msg');
+
+  btn.addEventListener('click', async () => {
+    if (!confirm('Reset your HWID? The mod will bind to whichever PC you next launch it on.')) return;
+
+    btn.disabled    = true;
+    btn.textContent = 'Resetting…';
+    msg.textContent = '';
+    msg.className   = 'hwid-msg';
+
+    try {
+      const res    = await fetch(`${API_URL}/hwid-reset`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ discord_id: user.id, key: lic.key })
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        msg.textContent = '✓ ' + result.message;
+        msg.className   = 'hwid-msg ok';
+        toast('HWID reset successfully!', 'green');
+        // Reload status
+        await loadHWIDStatus(user, lic);
+      } else {
+        msg.textContent = '✗ ' + result.error;
+        msg.className   = 'hwid-msg err';
+        btn.disabled    = false;
+      }
+    } catch (e) {
+      msg.textContent = '✗ Could not reach server: ' + e.message;
+      msg.className   = 'hwid-msg err';
+      btn.disabled    = false;
+    }
+    btn.textContent = 'Reset HWID';
+  });
+}
+
+// ── REDEEM FLOW ───────────────────────────────────────────────
+function setupRedeem(user) {
+  const btn = document.getElementById('btn-redeem');
+  const inp = document.getElementById('key-input');
+  const msg = document.getElementById('redeem-msg');
+
+  // Remove old listeners by cloning
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+
+  inp.addEventListener('input', () => {
+    inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+  });
+
+  async function tryRedeem() {
+    const key = inp.value.trim();
+    if (!key) { msg.textContent = '⚠ Enter a license key first.'; msg.className = 'redeem-msg err'; return; }
+
+    newBtn.disabled = true;
+    newBtn.textContent = 'Verifying…';
+    msg.textContent = ''; msg.className = 'redeem-msg';
+
+    try {
+      const res    = await fetch(`${API_URL}/redeem`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ discord_id: user.id, key })
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        msg.textContent = '✓ License activated!';
+        msg.className   = 'redeem-msg ok';
+        toast('License activated successfully!', 'green');
+        setTimeout(() => applyLicense(result.license, user), 700);
+      } else {
+        msg.textContent  = `✗ ${result.error || 'Invalid key.'}`;
+        msg.className    = 'redeem-msg err';
+        newBtn.disabled  = false;
+        newBtn.textContent = 'Activate';
+      }
+    } catch (e) {
+      msg.textContent  = '✗ Could not reach server: ' + e.message;
+      msg.className    = 'redeem-msg err';
+      newBtn.disabled  = false;
+      newBtn.textContent = 'Activate';
+    }
+  }
+
+  newBtn.addEventListener('click', tryRedeem);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') tryRedeem(); });
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────
+document.getElementById('btn-logout').addEventListener('click', () => {
+  localStorage.removeItem('blizz_dc_token');
+  document.getElementById('dashboard-sidebar').style.display = 'none';
+  document.getElementById('btn-burger').style.display = 'none';
+  CURRENT_USER = null; CURRENT_LIC = null; CURRENT_ACCESS = { is_staff: false, is_dev: false };
+  closeBurger();
+  switchTab('dashboard');
+  showLogin(); toast('Logged out.');
+});
+
+// ── INIT ──────────────────────────────────────────────────────
+async function init() {
+  takeTokenFromUrl();
+  const token = localStorage.getItem('blizz_dc_token');
+  if (!token) { showLogin(); return; }
+  let user;
+  try { user = await loadDiscordUser(token); }
+  catch { localStorage.removeItem('blizz_dc_token'); showLogin(); return; }
+  renderDashboard(user);
+}
+
+init();
+
+// ── REVIEWS ───────────────────────────────────────────────────
+function setupReviews(user, lic) {
+  const section = document.getElementById('review-section');
+  if (!lic || lic.expired) return;
+  section.style.display = 'block';
+  document.getElementById('reviews-locked-notice').style.display = 'none';
+
+  const starBtns  = document.querySelectorAll('.star-btn');
+  const textarea  = document.getElementById('review-text');
+  const charUsed  = document.getElementById('review-char-used');
+  const anonBox   = document.getElementById('review-anon');
+  const btn       = document.getElementById('btn-review');
+  const cancelBtn = document.getElementById('btn-review-cancel');
+  const msg       = document.getElementById('review-msg');
+
+  // Star interaction
+  starBtns.forEach(b => {
+    b.addEventListener('mouseenter', () => {
+      starBtns.forEach(s => s.classList.toggle('active', Number(s.dataset.star) <= Number(b.dataset.star)));
+    });
+    b.addEventListener('mouseleave', () => {
+      starBtns.forEach(s => s.classList.toggle('active', Number(s.dataset.star) <= REVIEW_SELECTED_STARS));
+    });
+    b.addEventListener('click', () => {
+      REVIEW_SELECTED_STARS = Number(b.dataset.star);
+      starBtns.forEach(s => s.classList.toggle('active', Number(s.dataset.star) <= REVIEW_SELECTED_STARS));
+    });
+  });
+
+  // Char counter
+  textarea.addEventListener('input', () => {
+    charUsed.textContent = textarea.value.length;
+  });
+
+  cancelBtn.addEventListener('click', () => cancelEditReview());
+
+  btn.addEventListener('click', async () => {
+    msg.textContent = ''; msg.className = 'review-msg';
+    if (REVIEW_SELECTED_STARS === 0) { msg.textContent = '⚠ Please select a star rating.'; msg.className = 'review-msg err'; return; }
+    if (!textarea.value.trim()) { msg.textContent = '⚠ Please write a short review.'; msg.className = 'review-msg err'; return; }
+
+    // Cooldown only blocks NEW reviews — editing your existing one is always allowed.
+    if (!EDITING_REVIEW_ID && REVIEW_COOLDOWN_DAYS_LEFT > 0) {
+      msg.textContent = `⚠ You can post another review in ${REVIEW_COOLDOWN_DAYS_LEFT} day${REVIEW_COOLDOWN_DAYS_LEFT !== 1 ? 's' : ''}.`;
+      msg.className = 'review-msg err';
+      return;
+    }
+
+    const isEdit = !!EDITING_REVIEW_ID;
+    btn.disabled = true; btn.textContent = isEdit ? 'Updating…' : 'Sending…';
+
+    try {
+      const res = await fetch(`${API_URL}/review${isEdit ? '/' + EDITING_REVIEW_ID : ''}`, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          discord_id: user.id,
+          key: lic.key,
+          username: user.username,
+          avatar: user.avatar,
+          stars: REVIEW_SELECTED_STARS,
+          text: textarea.value.trim(),
+          anonymous: anonBox.checked,
+        })
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        msg.textContent = isEdit ? '✓ Review updated!' : '✓ Review posted!'; msg.className = 'review-msg ok';
+        toast(isEdit ? 'Review updated.' : 'Review submitted — thanks!', 'green');
+        const wasEditing = isEdit;
+        textarea.value = ''; charUsed.textContent = '0'; REVIEW_SELECTED_STARS = 0; anonBox.checked = false;
+        starBtns.forEach(s => s.classList.remove('active'));
+        if (wasEditing) cancelEditReview();
+        loadReviews();
+      } else {
+        msg.textContent = '✗ ' + (result.error || 'Could not post review.'); msg.className = 'review-msg err';
+        if (typeof result.cooldown_days_left === 'number') REVIEW_COOLDOWN_DAYS_LEFT = result.cooldown_days_left;
+      }
+    } catch (e) {
+      msg.textContent = '✗ Could not reach server: ' + e.message; msg.className = 'review-msg err';
+    }
+    btn.disabled = false; btn.textContent = isEdit && EDITING_REVIEW_ID ? 'Update Review' : 'Submit Review';
+  });
+}
+
+// ── IMAGE UPLOAD MODAL ────────────────────────────────────────
+(function() {
+  const overlay   = document.getElementById('imgup-modal-overlay');
+  const closeBtn  = document.getElementById('imgup-modal-close');
+  const confirmBtn= document.getElementById('imgup-modal-confirm');
+  const check     = document.getElementById('imgup-modal-check');
+  let   pendingUploadCb = null;
+
+  function openImgModal(cb) {
+    if (localStorage.getItem('blizz_imgup_skip') === '1') { cb(); return; }
+    pendingUploadCb = cb;
+    overlay.classList.add('open');
+  }
+
+  function closeImgModal() { overlay.classList.remove('open'); pendingUploadCb = null; }
+
+  closeBtn.addEventListener('click', closeImgModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeImgModal(); });
+
+  confirmBtn.addEventListener('click', () => {
+    if (check.checked) localStorage.setItem('blizz_imgup_skip', '1');
+    const cb = pendingUploadCb;
+    closeImgModal();
+    if (cb) cb();
+  });
+
+  window._openImgModal = openImgModal;
+})();
+
+// ── IMAGE UPLOAD SECTION ──────────────────────────────────────
+function setupImageUpload(user, lic) {
+  const section = document.getElementById('imgup-section');
+  if (!lic || lic.expired) return;
+  section.style.display = 'block';
+  document.getElementById('clips-locked-notice').style.display = 'none';
+
+  const drop      = document.getElementById('imgup-drop');
+  const fileInp   = document.getElementById('imgup-file');
+  const preview   = document.getElementById('imgup-preview');
+  const caption   = document.getElementById('imgup-caption');
+  const anonBox   = document.getElementById('imgup-anon');
+  const btn       = document.getElementById('btn-imgup');
+  const cancelBtn = document.getElementById('btn-imgup-cancel');
+  const msg       = document.getElementById('imgup-msg');
+  let   files     = [];
+
+  function renderPreviews() {
+    preview.innerHTML = '';
+    files.forEach((f, i) => {
+      const url  = URL.createObjectURL(f);
+      const wrap = document.createElement('div'); wrap.className = 'imgup-thumb-wrap';
+      const img  = document.createElement('img'); img.src = url; img.className = 'imgup-thumb';
+      const rm   = document.createElement('button'); rm.className = 'imgup-thumb-rm'; rm.textContent = '✕';
+      rm.addEventListener('click', () => { files.splice(i, 1); renderPreviews(); });
+      wrap.appendChild(img); wrap.appendChild(rm);
+      preview.appendChild(wrap);
+    });
+  }
+
+  fileInp.addEventListener('change', () => {
+    const incoming = Array.from(fileInp.files).filter(f => f.size <= 8 * 1024 * 1024);
+    files = [...files, ...incoming].slice(0, 3);
+    fileInp.value = '';
+    renderPreviews();
+  });
+
+  drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('dragover');
+    const incoming = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') && f.size <= 8 * 1024 * 1024);
+    files = [...files, ...incoming].slice(0, 3);
+    renderPreviews();
+  });
+
+  cancelBtn.addEventListener('click', () => { files = []; renderPreviews(); cancelEditClip(); });
+
+  btn.addEventListener('click', async () => {
+    msg.textContent = ''; msg.className = 'imgup-msg';
+
+    // ── EDIT MODE: caption/anonymous only, no image re-upload ──
+    if (EDITING_CLIP_ID) {
+      const id = EDITING_CLIP_ID;
+      btn.disabled = true; btn.textContent = 'Updating…';
+      try {
+        const res = await fetch(`${API_URL}/clip/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            discord_id: user.id,
+            key: lic.key,
+            caption: caption.value.trim(),
+            anonymous: anonBox.checked,
+          })
+        });
+        const result = await res.json();
+        if (result.success) {
+          toast('Clip updated.', 'green');
+          cancelEditClip();
+          loadClips();
+        } else {
+          msg.textContent = '✗ ' + (result.error || 'Could not update clip.'); msg.className = 'imgup-msg err';
+        }
+      } catch (e) {
+        msg.textContent = '✗ Could not reach server: ' + e.message; msg.className = 'imgup-msg err';
+      }
+      btn.disabled = false; btn.textContent = EDITING_CLIP_ID ? 'Update Clip' : 'Send to Discord';
+      return;
+    }
+
+    // ── NEW UPLOAD ──
+    if (files.length === 0) { msg.textContent = '⚠ Please select at least one image.'; msg.className = 'imgup-msg err'; return; }
+
+    window._openImgModal(async () => {
+      btn.disabled = true; btn.textContent = 'Uploading…';
+      try {
+        const form = new FormData();
+        form.append('discord_id', user.id);
+        form.append('key', lic.key);
+        form.append('username', user.username);
+        if (user.avatar) form.append('avatar', user.avatar);
+        form.append('anonymous', String(anonBox.checked));
+        const captionText = caption.value.trim();
+        if (captionText) form.append('caption', captionText);
+        files.forEach((f) => form.append('images', f, f.name));
+
+        const res = await fetch(`${API_URL}/clip`, { method: 'POST', body: form });
+        const result = await res.json();
+
+        if (result.success) {
+          msg.textContent = '✓ Posted!'; msg.className = 'imgup-msg ok';
+          toast('Clip sent!', 'green');
+          files = []; renderPreviews(); caption.value = ''; anonBox.checked = false;
+          loadClips();
+        } else {
+          msg.textContent = '✗ ' + (result.error || 'Upload failed.'); msg.className = 'imgup-msg err';
+        }
+      } catch (e) {
+        msg.textContent = '✗ Could not reach server: ' + e.message; msg.className = 'imgup-msg err';
+      }
+      btn.disabled = false; btn.textContent = 'Send to Discord';
+    });
+  });
+}
+
+
+(function() {
+  const overlay  = document.getElementById('dl-modal-overlay');
+  const closeBtn = document.getElementById('dlm-close');
+  const confirm  = document.getElementById('dlm-confirm');
+  const check    = document.getElementById('dlm-check');
+  let   pendingHref = null;
+
+  function openModal(href) {
+    // If user previously checked "don't show again", skip modal
+    if (localStorage.getItem('blizz_dl_skip') === '1') {
+      window.location.href = href;
+      return;
+    }
+    pendingHref = href;
+    overlay.classList.add('open');
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    pendingHref = null;
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  confirm.addEventListener('click', () => {
+    if (check.checked) localStorage.setItem('blizz_dl_skip', '1');
+    const href = pendingHref; // save before closeModal() nulls it
+    closeModal();
+    if (href) window.location.href = href;
+  });
+
+  // Intercept the download button click
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('#btn-download');
+    if (!btn || btn.classList.contains('locked')) return;
+    const href = btn.getAttribute('href');
+    if (!href || href === '#') return;
+    e.preventDefault();
+    openModal(href);
+  });
+})();
+</script>
+
+<script>
+// ── SNEAK PEEKS (Dev only) ────────────────────────────────────
+// Needs these API routes (see SNEAK-PEEKS-API.md):
+//   GET    /peeks                          -> { peeks: [...] }
+//   POST   /peeks   (multipart, dev only)  -> { success, peek }
+//   DELETE /peek/:id?discord_id=&key=      -> { success }
+let PEEKS_READY = false;
+
+function setupPeeksAccess() {
+  const isDev = !!(CURRENT_ACCESS && CURRENT_ACCESS.is_dev);
+  document.getElementById('menu-peeks').style.display = isDev ? 'flex' : 'none';
+  if (!isDev) return;
+  if (!PEEKS_READY) { PEEKS_READY = true; setupPeeksForm(); }
+  loadPeeksAdmin();
+}
+
+function setupPeeksForm() {
+  const fileInp = document.getElementById('peek-file');
+  const label   = document.getElementById('peek-drop-label');
+  const drop    = document.getElementById('peek-drop');
+  const btn     = document.getElementById('btn-peek-post');
+  const msg     = document.getElementById('peek-msg');
+  const defaultLabel = label.innerHTML;
+  let file = null;
+
+  function setFile(f) {
+    file = f || null;
+    label.innerHTML = file ? '<strong>' + escapeHtml(file.name) + '</strong><br>Click to change' : defaultLabel;
+  }
+  fileInp.addEventListener('change', () => setFile(fileInp.files[0]));
+  drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); setFile(e.dataTransfer.files[0]); });
+
+  btn.addEventListener('click', async () => {
+    const title = document.getElementById('peek-title').value.trim();
+    const text  = document.getElementById('peek-text').value.trim();
+    const tag   = document.getElementById('peek-tag').value;
+    msg.textContent = ''; msg.className = 'imgup-msg';
+    if (!title) { msg.textContent = '⚠ Give it a title.'; msg.className = 'imgup-msg err'; return; }
+    if (!CURRENT_USER || !CURRENT_LIC) return;
+
+    btn.disabled = true; btn.textContent = 'Posting…';
+    try {
+      const form = new FormData();
+      form.append('discord_id', CURRENT_USER.id);
+      form.append('key', CURRENT_LIC.key);
+      form.append('title', title);
+      form.append('text', text);
+      form.append('tag', tag);
+      if (file) form.append('media', file, file.name);
+      const res = await fetch(`${API_URL}/peeks`, { method: 'POST', body: form });
+      const result = await res.json();
+      if (result.success) {
+        toast('Sneak peek posted.', 'green');
+        document.getElementById('peek-title').value = '';
+        document.getElementById('peek-text').value = '';
+        fileInp.value = ''; setFile(null);
+        loadPeeksAdmin();
+      } else {
+        msg.textContent = '✗ ' + (result.error || `Could not post (${res.status}).`); msg.className = 'imgup-msg err';
+      }
+    } catch (e) {
+      msg.textContent = '✗ Could not reach server: ' + e.message; msg.className = 'imgup-msg err';
+    }
+    btn.disabled = false; btn.textContent = 'Post sneak peek';
+  });
+}
+
+async function loadPeeksAdmin() {
+  const list = document.getElementById('peek-list');
+  try {
+    const res  = await fetch(`${API_URL}/peeks`);
+    const data = await res.json();
+    const peeks = data.peeks || [];
+    if (!peeks.length) { list.innerHTML = `<div class="empty-note">Nothing posted yet.</div>`; return; }
+    list.innerHTML = peeks.map(p => {
+      const when  = p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      const media = !p.media_url ? '' : (p.media_type || '').startsWith('video')
+        ? `<video class="peek-item-media" src="${escapeHtml(p.media_url)}" controls muted playsinline preload="metadata"></video>`
+        : `<img class="peek-item-media" src="${escapeHtml(p.media_url)}" alt="" loading="lazy">`;
+      return `
+        <div class="review-item">
+          <div class="review-item-top">
+            <div class="review-item-user"><span class="review-item-name">${escapeHtml(p.title)}</span><span class="pill-edited">${escapeHtml(p.tag || '')}</span></div>
+            <span class="pill-anon">${when}</span>
+          </div>
+          ${p.text ? `<div class="review-item-text">${escapeHtml(p.text)}</div>` : ''}
+          ${media}
+          <div class="review-item-meta"><button class="btn-own-delete" onclick="deletePeek(${Number(p.id)}, this)">Delete</button></div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="empty-note">Could not load sneak peeks: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+async function deletePeek(id, btn) {
+  if (!CURRENT_USER || !CURRENT_LIC) return;
+  if (!confirm('Delete this sneak peek from the website?')) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+  try {
+    const res = await fetch(`${API_URL}/peek/${id}?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (result.success) { toast('Sneak peek deleted.', 'green'); loadPeeksAdmin(); }
+    else { toast(result.error || 'Failed to delete.', 'red'); if (btn) { btn.disabled = false; btn.textContent = 'Delete'; } }
+  } catch (e) {
+    toast('Could not reach server: ' + e.message, 'red');
+    if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+  }
+}
+window.deletePeek = deletePeek;
+
+// Hide the Dev tab again on logout
+document.getElementById('btn-logout').addEventListener('click', () => {
+  document.getElementById('menu-peeks').style.display = 'none';
+});
+</script>
+
+</body>
+</html>
