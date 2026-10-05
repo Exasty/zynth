@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Checkout · Zynth Client</title>
+<meta name="theme-color" content="#07050A">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="zynth-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="zynth.css">
+
+<style>
+  .page { padding: 130px 0 100px; position: relative; }
+  .page::before { content: ""; position: absolute; left: 50%; top: 0; width: 900px; height: 460px; max-width: 160vw; transform: translateX(-50%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,77,166,.14), rgba(169,112,255,.06) 40%, transparent 70%); pointer-events: none; }
+  .page .wrap { position: relative; }
+  .page h1 { font: 700 clamp(40px, 6vw, 60px)/1 var(--display); margin-bottom: 8px; }
+  .page .lead { color: var(--muted); margin-bottom: 36px; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } }
+
+  .step { padding: 26px; margin-bottom: 16px; }
+  .step:hover { transform: none; }
+  .step-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 14px/1 var(--display); background: rgba(255,77,166,.15); color: var(--pink-light); flex-shrink: 0; }
+  .step-head h2 { font: 600 19px/1.2 var(--font); }
+
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 520px) { .options { grid-template-columns: 1fr; } }
+  .opt { position: relative; display: block; cursor: pointer; }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .opt-box { display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 18px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--line-strong); transition: border-color .2s, background .2s, box-shadow .2s; }
+  .opt:hover .opt-box { border-color: rgba(255,255,255,.28); }
+  .opt input:checked + .opt-box { border-color: var(--pink); background: linear-gradient(180deg, rgba(84,35,61,.55), rgba(84,35,61,.15)); box-shadow: 0 0 0 1px var(--pink) inset, 0 12px 30px -16px rgba(255,77,166,.7); }
+  .opt input:focus-visible + .opt-box { outline: 2px solid var(--pink); outline-offset: 3px; }
+  .opt input:disabled + .opt-box { opacity: .45; cursor: not-allowed; }
+  .opt-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .opt-name { font-weight: 600; font-size: 17px; }
+  .opt-price { font: 700 24px/1 var(--display); }
+  .opt-sub { color: var(--muted); font-size: 14px; }
+  .opt-icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: rgba(255,255,255,.06); color: var(--text); }
+  .opt input:checked + .opt-box .opt-icon { background: var(--pink); color: #fff; }
+  .opt-icon svg { width: 20px; height: 20px; }
+  .radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line-strong); flex-shrink: 0; transition: border-color .2s, border-width .2s; }
+  .opt input:checked + .opt-box .radio { border-color: var(--pink); border-width: 6px; }
+
+  .field { display: grid; gap: 6px; margin-top: 14px; }
+  .field label { font-size: 14px; color: var(--muted); font-weight: 500; }
+  .input { width: 100%; font: 500 16px var(--font); color: var(--white); background: #0d0b10; border: 1px solid var(--line-strong); border-radius: 12px; padding: 13px 14px; outline: none; transition: border-color .2s, box-shadow .2s; }
+  .input::placeholder { color: var(--dim); }
+  .input:focus { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(255,77,166,.15); }
+  select.input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238B8B90' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 14px; }
+  .crypto-fields[hidden] { display: none; }
+  .note { font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+
+  .code-row { display: flex; gap: 10px; }
+  .code-row .input { text-transform: uppercase; letter-spacing: .04em; }
+  .code-row .btn { flex-shrink: 0; }
+  .code-msg { font-size: 14px; margin-top: 10px; min-height: 20px; }
+  .code-msg.ok { color: #6EE7A8; }
+  .code-msg.err { color: #F87171; }
+  .code-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border-radius: 999px; background: rgba(255,77,166,.13); color: var(--pink-light); font: 600 14px var(--font); }
+  .code-chip button { background: none; border: 0; color: inherit; cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 50%; }
+
+  .summary { padding: 26px; position: sticky; top: 96px; }
+  .summary:hover { transform: none; }
+  .summary h2 { font: 600 19px/1.2 var(--font); margin-bottom: 18px; }
+  .account { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--line); margin-bottom: 20px; }
+  .account img { width: 36px; height: 36px; border-radius: 50%; }
+  .account .who { font-weight: 600; }
+  .account .sub { font-size: 13px; color: var(--muted); }
+  .account .switch { margin-left: auto; font-size: 13px; color: var(--muted); background: none; border: 0; cursor: pointer; }
+  .account .switch:hover { color: var(--white); }
+  .lines { display: grid; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .line { display: flex; justify-content: space-between; gap: 12px; font-size: 15.5px; color: var(--text); }
+  .line .neg { color: #6EE7A8; }
+  .line[hidden] { display: none; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 20px; }
+  .total span { color: var(--muted); }
+  .total b { font: 700 40px/1 var(--display); }
+  .pay { width: 100%; }
+  .pay[disabled] { opacity: .5; cursor: not-allowed; transform: none; }
+  .pay[disabled]::after { display: none; }
+  .error { color: #F87171; font-size: 14px; margin-top: 12px; min-height: 18px; }
+  .trust { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--muted); margin-top: 16px; }
+  .trust svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Order status (returning from the payment page) */
+  .status-card { max-width: 620px; margin: 0 auto; padding: 40px 32px; text-align: center; }
+  .status-card:hover { transform: none; }
+  .status-icon { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 20px; display: grid; place-items: center; }
+  .status-icon svg { width: 30px; height: 30px; }
+  .status-icon.ok { background: rgba(110,231,168,.13); color: #6EE7A8; }
+  .status-icon.wait { background: rgba(255,77,166,.13); color: var(--pink-light); }
+  .status-icon.bad { background: rgba(248,113,113,.12); color: #F87171; }
+  .status-card h2 { font: 700 32px/1.1 var(--display); margin-bottom: 10px; }
+  .status-card p { color: var(--muted); margin-bottom: 22px; }
+  .spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(255,77,166,.25); border-top-color: var(--pink); animation: spin .9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .keybox { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 14px 16px; border-radius: 14px; background: #0d0b10; border: 1px solid var(--line-strong); margin: 0 auto 20px; max-width: 460px; text-align: left; }
+  .keybox code { font: 500 15px var(--mono); color: var(--white); letter-spacing: .04em; word-break: break-all; }
+  .receipt { display: grid; gap: 8px; max-width: 360px; margin: 0 auto 26px; text-align: left; font-size: 14.5px; }
+  .receipt div { display: flex; justify-content: space-between; gap: 12px; color: var(--text); }
+  .receipt span { color: var(--muted); }
+  .row-center { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .skeleton { color: var(--dim); }
+</style>
+</head>
+<body>
+
+<nav class="top solid">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="zynth-logo.png" alt="">ZYNTH</a>
+    <div class="navlinks">
+      <a href="index.html">Home</a>
+      <a href="sneak-peeks.html">Sneak Peeks</a>
+      <a href="index.html#pricing">Pricing</a>
+      <a href="index.html#faq">FAQ</a>
+    </div>
+    <div class="nav-right">
+      <a href="dashboard.html" class="btn btn-ghost btn-sm">Dashboard</a>
+      <button class="burger" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <a href="index.html">Home</a><a href="sneak-peeks.html">Sneak Peeks</a><a href="index.html#pricing">Pricing</a><a href="dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<main class="page">
+  <div class="wrap">
+
+    <!-- ── STATUS VIEW (after paying) ── -->
+    <section id="status-view" hidden style="padding:0">
+      <div class="card status-card" id="status-card" aria-live="polite"></div>
+    </section>
+
+    <!-- ── CHECKOUT FORM ── -->
+    <section id="form-view" style="padding:0">
+      <h1>Checkout</h1>
+      <p class="lead">Your key is activated on your Discord account as soon as the payment is confirmed.</p>
+
+      <div class="layout">
+        <div>
+          <div class="card step">
+            <div class="step-head"><span class="step-num">1</span><h2>Choose your plan</h2></div>
+            <div class="options" id="products">
+              <label class="opt">
+                <input type="radio" name="product" value="monthly">
+                <span class="opt-box">
+                  <span class="opt-top"><span class="opt-name">Monthly</span><span class="radio"></span></span>
+                  <span class="opt-price" data-price="monthly">€10</span>
+                  <span class="opt-sub">30 days of every module</span>
+                </span>
+              </label>
+              <label class="opt">
+                <input type="radio" name="product" value="lifetime" checked>
+                <span class="opt-box">
+                  <span class="opt-top"><span class="opt-name">Lifetime</span><span class="radio"></span></span>
+                  <span class="opt-price" data-price="lifetime">€15</span>
+                  <span class="opt-sub">Pay once, every update forever</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="card step">
+            <div class="step-head"><span class="step-num">2</span><h2>Payment method</h2></div>
+            <div class="options">
+              <label class="opt">
+                <input type="radio" name="method" value="stripe" checked>
+                <span class="opt-box">
+                  <span class="opt-top">
+                    <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg></span>
+                    <span class="radio"></span>
+                  </span>
+                  <span class="opt-name">Card</span>
+                  <span class="opt-sub" id="stripe-sub">Visa, Mastercard, Apple Pay, Google Pay · via Stripe</span>
+                </span>
+              </label>
+              <label class="opt">
+                <input type="radio" name="method" value="crypto">
+                <span class="opt-box">
+                  <span class="opt-top">
+                    <span class="opt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m2-10v2m0 8v2"/></svg></span>
+                    <span class="radio"></span>
+                  </span>
+                  <span class="opt-name">Crypto</span>
+                  <span class="opt-sub" id="crypto-sub">USDT, BTC, LTC and more · via 0xProcessing</span>
+                </span>
+              </label>
+            </div>
+            <div class="crypto-fields" id="crypto-fields" hidden>
+              <div class="field">
+                <label for="coin">Cryptocurrency</label>
+                <select class="input" id="coin"><option value="">Loading…</option></select>
+              </div>
+              <div class="field">
+                <label for="email">Email for your payment receipt</label>
+                <input class="input" id="email" type="email" placeholder="you@example.com" autocomplete="email" maxlength="200">
+              </div>
+              <p class="note">0xProcessing needs an email for the receipt. The exact crypto amount is shown on the next page.</p>
+            </div>
+          </div>
+
+          <div class="card step">
+            <div class="step-head"><span class="step-num">3</span><h2>Discount or creator code</h2></div>
+            <div id="code-entry">
+              <div class="code-row">
+                <input class="input" id="code" type="text" placeholder="e.g. EXASTY" maxlength="24" autocomplete="off" spellcheck="false" aria-label="Discount code">
+                <button class="btn btn-ghost" id="apply-code" type="button">Apply</button>
+              </div>
+            </div>
+            <div id="code-applied" hidden></div>
+            <div class="code-msg" id="code-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <aside class="card summary">
+          <h2>Order summary</h2>
+          <div id="account"></div>
+          <div class="lines">
+            <div class="line"><span id="sum-product">Zynth Lifetime</span><span id="sum-base">€15.00</span></div>
+            <div class="line" id="sum-discount-row" hidden><span id="sum-discount-label">Code</span><span class="neg" id="sum-discount">−€0.00</span></div>
+            <div class="line" id="sum-fee-row" hidden><span>Processing fee</span><span id="sum-fee">€0.00</span></div>
+          </div>
+          <div class="total"><span>Total</span><b id="sum-total">€15.00</b></div>
+          <button class="btn btn-primary pay" id="pay" type="button">Continue to payment</button>
+          <div class="error" id="pay-error" role="alert"></div>
+          <div class="trust">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <span>You pay on Stripe's or 0xProcessing's secure page. We never see your card details.</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="legal" style="margin-top:0;padding-top:0;border:0">
+      <span>© 2026 Zynth Client</span>
+      <span>Not affiliated with Mojang or Microsoft.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="zynth.js"></script>
+<script>
+(function () {
+  const API = window.ZYNTH_API_URL;
+  const CLIENT_ID = window.ZYNTH_DISCORD_CLIENT_ID;
+  const REDIRECT = location.origin + location.pathname;      // add this URL in the Discord Developer Portal
+  const TOKEN_KEY = 'blizz_dc_token';                         // shared with the dashboard, so one login works for both
+  const SAVED = 'zynth_checkout_draft';
+
+  const $ = id => document.getElementById(id);
+  const euros = c => '€' + (c / 100).toFixed(2);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const store = {
+    get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+    del: k => { try { localStorage.removeItem(k); } catch {} },
+  };
+
+  let user = null, cfg = null, applied = null, busy = false;
+
+  // ── API ─────────────────────────────────────────────────────
+  async function api(path, opts = {}) {
+    const token = store.get(TOKEN_KEY);
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: { ...(opts.body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) { store.del(TOKEN_KEY); user = null; renderAccount(); }
+    if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+    return data;
+  }
+
+  // ── Discord login (same flow as the dashboard) ──────────────
+  function takeTokenFromUrl() {
+    if (!location.hash.includes('access_token') && !location.hash.includes('error')) return;
+    const p = new URLSearchParams(location.hash.slice(1));
+    const expected = store.get('zynth_oauth_state');
+    store.del('zynth_oauth_state');
+    history.replaceState(null, '', location.pathname + location.search);
+    if (p.get('access_token') && expected && p.get('state') === expected) store.set(TOKEN_KEY, p.get('access_token'));
+  }
+  function login() {
+    saveDraft();
+    const state = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+    store.set('zynth_oauth_state', state);
+    location.href = 'https://discord.com/api/oauth2/authorize?client_id=' + CLIENT_ID +
+      '&redirect_uri=' + encodeURIComponent(REDIRECT) + '&response_type=token&scope=identify&state=' + state;
+  }
+  async function loadUser() {
+    const token = store.get(TOKEN_KEY);
+    if (!token) return null;
+    const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: 'Bearer ' + token } }).catch(() => null);
+    if (!res || !res.ok) { store.del(TOKEN_KEY); return null; }
+    return res.json();
+  }
+  function avatar(u) {
+    return u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=64`
+      : `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(u.id) % 6n)}.png`;
+  }
+  function renderAccount() {
+    const el = $('account');
+    if (user) {
+      el.innerHTML = `<div class="account"><img src="${avatar(user)}" alt=""><div><div class="who">${esc(user.global_name || user.username)}</div>
+        <div class="sub">Your key goes to this Discord account</div></div><button class="switch" id="logout" type="button">Switch</button></div>`;
+      $('logout').onclick = () => { store.del(TOKEN_KEY); user = null; renderAccount(); updatePay(); };
+    } else {
+      el.innerHTML = `<div class="account"><div><div class="who">Log in to continue</div><div class="sub">Your key is linked to your Discord account</div></div></div>`;
+    }
+    updatePay();
+  }
+
+  // ── Form state ──────────────────────────────────────────────
+  const product = () => document.querySelector('input[name=product]:checked').value;
+  const method = () => document.querySelector('input[name=method]:checked').value;
+
+  function saveDraft() {
+    store.set(SAVED, JSON.stringify({ product: product(), method: method(), code: applied?.code || $('code').value.trim(), email: $('email').value.trim() }));
+  }
+  function restoreDraft() {
+    const params = new URLSearchParams(location.search);
+    let d = {};
+    try { d = JSON.parse(store.get(SAVED) || '{}'); } catch {}
+    store.del(SAVED);
+    const p = params.get('product') || d.product;
+    if (p) { const r = document.querySelector(`input[name=product][value="${p}"]`); if (r) r.checked = true; }
+    if (d.method) { const r = document.querySelector(`input[name=method][value="${d.method}"]`); if (r && !r.disabled) r.checked = true; }
+    if (d.email) $('email').value = d.email;
+    const code = params.get('code') || d.code;
+    if (code) $('code').value = code;
+  }
+
+  function priceOf(id) { return cfg?.products.find(p => p.id === id)?.price_cents ?? (id === 'monthly' ? 1000 : 1500); }
+  function feeOf(m) { return cfg?.methods?.[m]?.fee_cents || 0; }
+
+  function renderSummary() {
+    const base = priceOf(product());
+    const discount = applied && applied.product === product() && applied.method === method() ? applied.discount_cents : 0;
+    const fee = base - discount === 0 ? 0 : feeOf(method());
+    $('sum-product').textContent = product() === 'monthly' ? 'Zynth Monthly' : 'Zynth Lifetime';
+    $('sum-base').textContent = euros(base);
+    $('sum-discount-row').hidden = !discount;
+    $('sum-discount-label').textContent = applied ? `${applied.label} · ${applied.code}` : 'Code';
+    $('sum-discount').textContent = '−' + euros(discount);
+    $('sum-fee-row').hidden = !fee;
+    $('sum-fee').textContent = euros(fee);
+    $('sum-total').textContent = euros(base - discount + fee);
+    $('crypto-fields').hidden = method() !== 'crypto';
+    updatePay();
+  }
+
+  function updatePay() {
+    const btn = $('pay');
+    if (!user) { btn.textContent = 'Log in with Discord'; btn.disabled = false; return; }
+    btn.disabled = busy;
+    btn.textContent = busy ? 'Starting payment…' : method() === 'crypto' ? 'Continue to crypto payment' : 'Continue to payment';
+  }
+
+  // ── Codes ───────────────────────────────────────────────────
+  async function applyCode(silent) {
+    const code = $('code').value.trim().toUpperCase();
+    const msg = $('code-msg');
+    msg.className = 'code-msg'; msg.textContent = '';
+    if (!code) return;
+    if (!user) { if (!silent) { msg.className = 'code-msg err'; msg.textContent = 'Log in first to use a code.'; } return; }
+    $('apply-code').disabled = true;
+    try {
+      const r = await api('/checkout/validate-code', { method: 'POST', body: JSON.stringify({ product: product(), method: method(), code }) });
+      if (!r.valid) {
+        applied = null;
+        msg.className = 'code-msg err'; msg.textContent = r.error;
+      } else {
+        applied = { ...r.code, product: product(), method: method() };
+        $('code-entry').hidden = true;
+        $('code-applied').hidden = false;
+        $('code-applied').innerHTML = `<span class="code-chip">${esc(r.code.code)} · −${euros(r.code.discount_cents)}<button type="button" id="remove-code" aria-label="Remove code">×</button></span>`;
+        $('remove-code').onclick = removeCode;
+        msg.className = 'code-msg ok';
+        msg.textContent = r.code.type === 'media' ? `Creator code applied. You save ${euros(r.code.discount_cents)}.` : `Code applied. You save ${euros(r.code.discount_cents)}.`;
+      }
+    } catch (e) {
+      msg.className = 'code-msg err'; msg.textContent = e.message;
+    }
+    $('apply-code').disabled = false;
+    renderSummary();
+  }
+  function removeCode() {
+    applied = null;
+    $('code').value = '';
+    $('code-entry').hidden = false;
+    $('code-applied').hidden = true;
+    $('code-msg').textContent = '';
+    renderSummary();
+  }
+
+  // ── Pay ─────────────────────────────────────────────────────
+  async function pay() {
+    $('pay-error').textContent = '';
+    if (!user) return login();
+    const body = { product: product(), method: method(), code: applied?.code || undefined };
+    if (body.method === 'crypto') {
+      body.crypto_currency = $('coin').value;
+      body.email = $('email').value.trim();
+      if (!body.crypto_currency) return ($('pay-error').textContent = 'Choose a cryptocurrency.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) return ($('pay-error').textContent = 'Enter a valid email address.');
+    }
+    busy = true; updatePay();
+    try {
+      const r = await api('/checkout/create', { method: 'POST', body: JSON.stringify(body) });
+      if (r.free || !r.redirect_url) { location.href = `${location.pathname}?order=${r.order.id}`; return; }
+      location.href = r.redirect_url;
+    } catch (e) {
+      $('pay-error').textContent = e.message;
+      busy = false; updatePay();
+    }
+  }
+
+  // ── Order status after returning ────────────────────────────
+  const ICONS = {
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    bad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  };
+  function statusCard(kind, title, text, extra = '') {
+    $('status-card').innerHTML = `<div class="status-icon ${kind}">${kind === 'wait' ? '<div class="spinner"></div>' : ICONS[kind]}</div>
+      <h2>${title}</h2><p>${text}</p>${extra}`;
+  }
+  async function showOrder(orderId, cancelled) {
+    $('form-view').hidden = true;
+    $('status-view').hidden = false;
+    if (!user) {
+      statusCard('wait', 'Log in to see your order', 'Your order is linked to your Discord account.', '<button class="btn btn-primary" id="status-login">Log in with Discord</button>');
+      $('status-login').onclick = login;
+      return;
+    }
+    const started = Date.now();
+    const tick = async () => {
+      let o;
+      try { o = (await api('/checkout/order/' + encodeURIComponent(orderId))).order; }
+      catch (e) { return statusCard('bad', "We couldn't find that order", esc(e.message), '<a class="btn btn-ghost" href="checkout.html">Back to checkout</a>'); }
+
+      const receipt = `<div class="receipt"><div><span>Order</span>${esc(o.ref)}</div><div><span>Plan</span>${esc(o.product_name)}</div>
+        ${o.code ? `<div><span>Code</span>${esc(o.code)} (−${euros(o.discount_cents)})</div>` : ''}<div><span>Total</span>${euros(o.total_cents)}</div></div>`;
+
+      if (o.status === 'paid') {
+        return statusCard('ok', 'Payment confirmed 🎉', 'Your license is active. We also sent the key to your Discord DMs.',
+          `${o.license_key ? `<div class="keybox"><code id="key">${esc(o.license_key)}</code><button class="btn btn-ghost btn-sm" id="copy-key">Copy</button></div>` : ''}
+           ${receipt}<div class="row-center"><a class="btn btn-primary" href="dashboard.html">Go to dashboard</a></div>`);
+        bindCopy();
+        return;
+      }
+      if (o.status === 'pending' && cancelled) {
+        return statusCard('bad', 'Payment cancelled', "No money was taken. You can try again whenever you're ready.", '<a class="btn btn-primary" href="checkout.html">Try again</a>');
+      }
+      if (o.status === 'pending') {
+        statusCard('wait', 'Waiting for your payment', o.payment_method === 'crypto'
+          ? 'Crypto payments need a few blockchain confirmations. You can close this page; your key arrives in your Discord DMs.'
+          : 'This usually takes a few seconds.', receipt);
+        if (Date.now() - started < 30 * 60 * 1000) setTimeout(tick, o.payment_method === 'crypto' ? 10000 : 3000);
+        return;
+      }
+      const texts = {
+        expired: ['This order expired', "The payment wasn't completed in time. If you already paid, contact support with your order number."],
+        cancelled: ['Payment cancelled', 'No money was taken.'],
+        failed: ['Payment failed', 'The payment did not go through. Please try again or use another method.'],
+        underpaid: ['Payment incomplete', 'Less than the full amount arrived. Open a support ticket with your order number and we will sort it out.'],
+        refunded: ['Order refunded', 'This order was refunded and its key is no longer active.'],
+        disputed: ['Payment disputed', 'This payment is under dispute. Contact support if you think this is a mistake.'],
+      }[o.status] || ['Order status: ' + esc(o.status), ''];
+      statusCard('bad', texts[0], texts[1], receipt + '<div class="row-center"><a class="btn btn-primary" href="checkout.html">New checkout</a></div>');
+    };
+    tick();
+  }
+  function bindCopy() {
+    const b = $('copy-key');
+    if (!b) return;
+    b.onclick = () => navigator.clipboard.writeText($('key').textContent).then(() => { b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy'), 1500); });
+  }
+
+  // ── Coins + config ──────────────────────────────────────────
+  async function loadConfig() {
+    try { cfg = await api('/checkout/config'); } catch { cfg = null; }
+    if (!cfg) {
+      $('pay-error').textContent = 'Checkout is offline right now. Please try again in a few minutes.';
+      $('pay').disabled = true;
+      return;
+    }
+    for (const p of cfg.products) {
+      const el = document.querySelector(`[data-price="${p.id}"]`);
+      if (el) el.textContent = euros(p.price_cents).replace('.00', '');
+    }
+    for (const m of ['stripe', 'crypto']) {
+      if (!cfg.methods[m].available) {
+        const r = document.querySelector(`input[name=method][value="${m}"]`);
+        r.disabled = true;
+        $(m + '-sub').textContent = 'Not available right now';
+        if (r.checked) { const other = document.querySelector(`input[name=method]:not([value="${m}"])`); if (!other.disabled) other.checked = true; }
+      }
+    }
+  }
+  async function loadCoins() {
+    if (!cfg?.methods.crypto.available) return;
+    try {
+      const { coins } = await api('/checkout/coins');
+      $('coin').innerHTML = '<option value="">Choose a coin</option>' + coins.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+    } catch (e) {
+      $('coin').innerHTML = '<option value="">Unavailable</option>';
+    }
+  }
+
+  // ── Start ───────────────────────────────────────────────────
+  (async () => {
+    takeTokenFromUrl();
+    restoreDraft();
+    document.querySelectorAll('input[name=product], input[name=method]').forEach(r => r.addEventListener('change', () => {
+      if (applied) { const c = applied.code; removeCode(); $('code').value = c; applyCode(true); }
+      renderSummary();
+    }));
+    $('apply-code').onclick = () => applyCode(false);
+    $('code').addEventListener('keydown', e => { if (e.key === 'Enter') applyCode(false); });
+    $('pay').onclick = pay;
+
+    user = await loadUser();
+    await loadConfig();
+    renderAccount();
+    renderSummary();
+
+    const params = new URLSearchParams(location.search);
+    if (params.get('order')) return showOrder(params.get('order'), params.has('cancelled'));
+    loadCoins();
+    if ($('code').value.trim() && user) applyCode(true);
+  })();
+})();
+</script>
+</body>
+</html>

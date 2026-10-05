@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Zynth Client</title>
-<meta name="description" content="A Fabric client for 1.21.11 built to help find bases, farms, and spawners that Anti-Cheat tries to hide.">
+<meta name="description" content="A Fabric client for 1.21.11 built to help find bases, farms, and spawners that Anti-Xray tries to hide.">
 <meta name="theme-color" content="#07050A">
 <script>document.documentElement.classList.add('js');</script>
 <link rel="icon" type="image/png" href="zynth-logo.png">
@@ -71,15 +71,6 @@
     .step { display: flex; align-items: center; gap: 16px; text-align: left; }
     .step .tile { margin: 0; flex-shrink: 0; }
   }
-
-  /* ---------- Module preview ---------- */
-  .mod-preview { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .mp { padding: 22px; }
-  .mp .cat { font: 600 12px/1 var(--font); letter-spacing: .1em; text-transform: uppercase; }
-  .mp .count { font: 700 40px/1 var(--display); margin: 14px 0 6px; }
-  .mp p { color: var(--muted); font-size: 14px; }
-  .center { text-align: center; margin-top: 30px; }
-  @media (max-width: 860px) { .mod-preview { grid-template-columns: 1fr 1fr; } }
 
   /* ---------- Pricing ---------- */
   .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 800px; margin: 0 auto; }
@@ -161,7 +152,7 @@
       <span class="w" style="animation-delay:.32s">what's</span>
       <span class="w accent" style="animation-delay:.44s">buried.</span>
     </h1>
-    <p class="lede up" style="animation-delay:.65s">A Fabric client for 1.21.11 built to help find bases, farms, and spawners that Anti-Cheat tries to hide.</p>
+    <p class="lede up" style="animation-delay:.65s">A Fabric client for 1.21.11 built to help find bases, farms, and spawners that Anti-Xray tries to hide.</p>
     <div class="ctas up" style="animation-delay:.8s">
       <a href="#pricing" class="btn btn-primary">Get Zynth</a>
       <a href="https://discord.com/invite/Xa6BaUTgVs" class="btn btn-ghost">Discord</a>
@@ -223,19 +214,6 @@
   </div>
 </section>
 
-<!-- MODULES PREVIEW -->
-<section style="padding-top:0">
-  <div class="wrap">
-    <div class="head reveal"><h2>38 modules</h2></div>
-    <div class="mod-preview">
-      <div class="card mp reveal"><div class="glow t1"></div><div class="cat accent">Base Finding</div><div class="count">9</div><p>Chunk, light, farm and spawner finders.</p></div>
-      <div class="card mp reveal"><div class="glow t2"></div><div class="cat" style="color:#E07BFF">Render</div><div class="count">7</div><p>Storage, player, block and item ESP.</p></div>
-      <div class="card mp reveal"><div class="glow t3"></div><div class="cat" style="color:#B794FF">Visuals</div><div class="count">10</div><p>Crosshair editor, trails, aura and more.</p></div>
-      <div class="card mp reveal"><div class="glow t1"></div><div class="cat" style="color:var(--pink-light)">Misc &amp; Donut</div><div class="count">12</div><p>Freecam, Auto Tool, DonutSMP tools.</p></div>
-    </div>
-  </div>
-</section>
-
 <!-- PRICING -->
 <section id="pricing">
   <div class="wrap">
@@ -246,7 +224,7 @@
     <div class="plans">
       <div class="card plan reveal">
         <h3>Monthly</h3>
-        <div class="price"><span class="cur">€</span><span class="amt">12</span><span class="per">/ month</span></div>
+        <div class="price"><span class="cur">€</span><span class="amt">10</span><span class="per">/ month</span></div>
         <ul>
           <li>Every module</li>
           <li>All 5 GUIs and the HUD editor</li>
@@ -254,7 +232,7 @@
           <li>Support on Discord</li>
           <li class="no">Lifetime access</li>
         </ul>
-        <a href="https://blizzardclient.mysellauth.com/checkout-link?cart[0][productId]=752041&cart[0][variantId]=1236946&cart[0][quantity]=1" class="btn btn-ghost">Buy monthly</a>
+        <a href="checkout.html?product=monthly" class="btn btn-ghost">Buy monthly</a>
       </div>
       <div class="card plan best reveal">
         <span class="badge">Better value</span>
@@ -267,10 +245,10 @@
           <li>Support on Discord</li>
           <li>Lifetime role on the server</li>
         </ul>
-        <a href="https://blizzardclient.mysellauth.com/checkout-link?cart[0][productId]=743791&cart[0][variantId]=1217599&cart[0][quantity]=1" class="btn btn-primary">Buy lifetime</a>
+        <a href="checkout.html?product=lifetime" class="btn btn-primary">Buy lifetime</a>
       </div>
     </div>
-    <p class="after">Already bought one? <a href="dashboard.html">Activate it in the dashboard</a></p>
+    <p class="after">Got a creator code? Enter it at checkout to save €0.50. Already have a key? <a href="dashboard.html">Activate it in the dashboard</a></p>
   </div>
 </section>
 
@@ -349,7 +327,7 @@ If you ever have an emergency or need some extra help, feel free to open a suppo
 <script>
   // Reviews come from the same API the dashboard uses
   (function () {
-    var API_URL = 'https://blizzardapi.exasty.workers.dev';
+    var API_URL = window.ZYNTH_API_URL;
     function esc(s) { return (s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     fetch(API_URL + '/reviews').then(function (r) { return r.json(); }).then(function (data) {
       var reviews = (data.reviews || []).filter(function (r) { return r.stars >= 4 && r.text; }).slice(0, 6);

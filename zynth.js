@@ -1,4 +1,11 @@
-/* Shared behaviour for index.html and modules.html */
+/* Shared settings + behaviour for the website pages (index, sneak peeks, checkout). */
+
+// ── SETTINGS: change these in one place ─────────────────────────
+// The Zynth backend (server.js). Must match API_URL in dashboard.html.
+window.ZYNTH_API_URL = 'https://blizzardapi.exasty.workers.dev';
+// Discord application (Developer Portal → OAuth2 → Client ID). Must match dashboard.html.
+window.ZYNTH_DISCORD_CLIENT_ID = '1555931215180079236';
+
 (function () {
   // Nav background once you scroll
   var nav = document.querySelector('nav.top');

@@ -717,6 +717,107 @@ footer {
 .peek-item-media { width: 100%; max-height: 260px; object-fit: cover; border-radius: 10px; margin-top: 12px; display: block; }
 @media(max-width: 860px) { .peeks-section { padding: 20px; } }
 
+/* ── MEDIA / CODES / PAYOUTS ── */
+.panel-box { border: 1px solid var(--border); background: var(--panel); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+.panel-box h3 { font: 700 21px/1.15 var(--display); color: var(--ink); margin-bottom: 4px; }
+.panel-box .sub { font-size: 14.5px; color: var(--dim); margin-bottom: 16px; }
+.panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.panel-head .sub { margin-bottom: 0; }
+
+.code-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  background: radial-gradient(ellipse 80% 120% at 0% 0%, rgba(84,35,61,.7), var(--panel) 70%); border-color: rgba(255,77,166,.3); }
+.code-hero .label { font: 600 11px/1 var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.code-hero .code { font: 700 clamp(30px, 5vw, 44px)/1 var(--mono); color: var(--ink); letter-spacing: .04em; }
+.code-hero .terms { font-size: 14.5px; color: var(--text); margin-top: 10px; }
+.code-hero .terms b { color: var(--accent-light); font-weight: 600; }
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile { border: 1px solid var(--border); background: var(--panel); border-radius: var(--radius); padding: 18px; min-width: 0; }
+.tile .k { font: 600 11px/1.2 var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.tile .v { font: 700 30px/1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 13px; color: var(--dim); margin-top: 6px; }
+.tile.hl { border-color: rgba(255,77,166,.35); }
+.tiles.small .tile { padding: 14px 16px; }
+.tiles.small .v { font-size: 22px; }
+@media (max-width: 860px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 860px) { .charts { grid-template-columns: 1fr; } }
+.chart-box { border: 1px solid var(--border); background: var(--panel); border-radius: var(--radius); padding: 20px; min-width: 0; position: relative; }
+.chart-box h4 { font: 600 15.5px/1.3 var(--font); color: var(--ink); }
+.chart-box .chart-sub { font-size: 13px; color: var(--dim); margin-bottom: 14px; }
+.chart-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.chart-toggle { background: none; border: 1px solid var(--border-bright); color: var(--dim); border-radius: 999px; padding: 5px 11px; font: 600 12px var(--font); cursor: pointer; white-space: nowrap; }
+.chart-toggle:hover { color: var(--ink); border-color: var(--accent); }
+.chart { width: 100%; height: 170px; display: block; overflow: visible; }
+.chart .grid { stroke: rgba(255,255,255,.06); stroke-width: 1; }
+.chart .axis { fill: var(--dim2); font: 500 10.5px var(--font); }
+.chart .bar { fill: #E8479A; }
+.chart .hit { fill: transparent; cursor: default; }
+.chart .hit:hover + .bar, .chart .bar.on { fill: #FF82C1; }
+.chart-tip { position: absolute; pointer-events: none; background: #1d1a22; border: 1px solid var(--border-bright); border-radius: 10px; padding: 7px 10px; font-size: 12.5px; color: var(--ink); white-space: nowrap; transform: translate(-50%, -100%); box-shadow: 0 10px 30px -10px rgba(0,0,0,.8); z-index: 3; }
+.chart-tip span { color: var(--dim); display: block; font-size: 11.5px; }
+.chart-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.chart-table th, .chart-table td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--border); }
+.chart-table td:last-child, .chart-table th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.chart-table th { color: var(--dim); font-weight: 600; }
+.chart-table-wrap { max-height: 170px; overflow: auto; }
+
+.rows { display: grid; gap: 8px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 14px; align-items: center; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--ghost); }
+.row .main { min-width: 0; }
+.row .title { font-weight: 600; color: var(--ink); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row .meta { font-size: 13.5px; color: var(--dim); margin-top: 3px; overflow-wrap: anywhere; }
+.row .right { text-align: right; font-variant-numeric: tabular-nums; }
+.row .amount { font: 700 18px/1 var(--display); color: var(--ink); }
+.row .amount.neg { color: var(--red); }
+.row .actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
+.row .detail { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px; }
+
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; font: 600 10.5px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; background: var(--ghost-strong); color: var(--dim); }
+.badge.pink { background: rgba(255,77,166,.13); color: var(--accent-light); }
+.badge.green { background: rgba(52,211,153,.12); color: var(--green); }
+.badge.yellow { background: rgba(251,191,36,.12); color: var(--yellow); }
+.badge.red { background: rgba(248,113,113,.12); color: var(--red); }
+.badge.violet { background: rgba(167,139,250,.14); color: var(--purple); }
+
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.form-grid .full { grid-column: 1 / -1; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+.f { display: grid; gap: 6px; align-content: start; }
+.f label { font-size: 13.5px; color: var(--dim); font-weight: 500; }
+.f .hint { font-size: 12.5px; color: var(--dim2); }
+.f input, .f select { height: 44px; }
+.f input, .f select, .f textarea { width: 100%; background: var(--bg-2); border: 1px solid var(--border-bright); color: var(--ink); border-radius: var(--radius-sm); padding: 11px 12px; font: 400 15px var(--font); outline: none; }
+.f input:focus, .f select:focus, .f textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,77,166,.15); }
+.f select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238B8B90' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 14px; }
+.checks { display: flex; gap: 14px; flex-wrap: wrap; padding-top: 4px; }
+.checks label { display: flex; gap: 7px; align-items: center; color: var(--text); font-size: 14.5px; cursor: pointer; }
+.checks input { width: 16px; height: 16px; accent-color: var(--accent); }
+.form-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+.msg { font-size: 14px; min-height: 18px; }
+.msg.ok { color: var(--green); }
+.msg.err { color: var(--red); }
+
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.toolbar input, .toolbar select { background: var(--bg-2); border: 1px solid var(--border-bright); color: var(--ink); border-radius: 999px; padding: 9px 14px; font: 400 14.5px var(--font); outline: none; }
+.toolbar input { flex: 1; min-width: 180px; }
+.toolbar input:focus, .toolbar select:focus { border-color: var(--accent); }
+.mini-btn { border-radius: 999px; padding: 7px 13px; font: 600 12.5px/1 var(--font); cursor: pointer; border: 1px solid var(--border-bright); background: transparent; color: var(--text); transition: background .2s, border-color .2s, color .2s; }
+.mini-btn:hover { border-color: var(--accent); color: #fff; background: var(--accent-deep); }
+.mini-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.mini-btn.primary:hover { background: var(--accent-light); }
+.mini-btn.danger { border-color: rgba(248,113,113,.35); color: var(--red); }
+.mini-btn.danger:hover { background: rgba(248,113,113,.15); color: var(--red); }
+.mini-btn:disabled { opacity: .45; cursor: not-allowed; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; margin-bottom: 12px; }
+.kv span { color: var(--dim); }
+.kv b { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+.timeline { display: grid; gap: 4px; font-size: 13px; color: var(--dim); margin: 8px 0 12px; }
+.loading-note { color: var(--dim); font-size: 14px; padding: 18px 0; }
+
+[hidden] { display: none !important; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -876,6 +977,18 @@ footer {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
           Sneak Peeks
         </button>
+        <button class="menu-item" data-tab="media" id="menu-media" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 10l4.5-2.6a.5.5 0 0 1 .75.43v8.34a.5.5 0 0 1-.75.43L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+          Media
+        </button>
+        <button class="menu-item" data-tab="codes" id="menu-codes" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+          Codes
+        </button>
+        <button class="menu-item" data-tab="payouts" id="menu-payouts" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 9.5v6M18 9.5v6"/></svg>
+          Payouts
+        </button>
       </div>
 
       <button class="btn-ghost sidebar-logout" id="btn-logout">
@@ -989,9 +1102,9 @@ footer {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           </div>
           <span class="card-tag">Billing</span>
-          <div class="card-title">Manage Account</div>
-          <div class="card-desc">Renewal options, invoice history, and subscription settings.</div>
-          <a class="card-cta" href="https://sellauth.com" target="_blank">Open Billing <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <div class="card-title">Buy or Renew</div>
+          <div class="card-desc">Get Monthly or Lifetime with card or crypto. Your key activates instantly.</div>
+          <a class="card-cta" href="checkout.html">Go to Checkout <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
         </div>
       </div>
 
@@ -1001,7 +1114,7 @@ footer {
             <div class="redeem-section-title">Activate License</div>
             <div class="redeem-section-sub">Enter the license key from your Discord ticket to unlock your download.</div>
           </div>
-          <a class="btn-ghost" href="index.html#pricing" style="white-space:nowrap;flex-shrink:0">Buy a Key →</a>
+          <a class="btn-ghost" href="checkout.html" style="white-space:nowrap;flex-shrink:0">Buy a Key →</a>
         </div>
         <div class="redeem-inner">
           <input class="redeem-input" id="key-input" type="text" placeholder="BLZMN-XXXX-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
@@ -1189,6 +1302,92 @@ footer {
     </div>
     <!-- /TAB: SNEAK PEEKS -->
 
+    <!-- TAB: MEDIA (media partners) -->
+    <div class="tab-panel" id="tab-media" style="display:none">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Media partner</div>
+        <h1 class="dash-title">Your <em>creator code</em></h1>
+      </div>
+      <div id="media-body"><div class="loading-note">Loading your stats…</div></div>
+    </div>
+    <!-- /TAB: MEDIA -->
+
+    <!-- TAB: CODES (Dev) -->
+    <div class="tab-panel" id="tab-codes" style="display:none">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Dev only</div>
+        <h1 class="dash-title">Discount <em>codes</em></h1>
+      </div>
+
+      <div class="tiles" id="codes-overview"></div>
+
+      <div class="panel-box">
+        <h3>Create a code</h3>
+        <div class="sub">Media codes give the customer €0.50 off and the owner €0.50 per paid order. Promo codes are normal discounts.</div>
+        <form id="code-form" autocomplete="off">
+          <div class="form-grid">
+            <div class="f"><label for="cf-code">Code</label><input id="cf-code" maxlength="24" placeholder="WELCOME" required style="text-transform:uppercase"><span class="hint">3–24 letters, numbers, - or _</span></div>
+            <div class="f"><label for="cf-type">Type</label>
+              <select id="cf-type"><option value="promo">Promo code</option><option value="media">Media (creator) code</option></select></div>
+            <div class="f cf-promo"><label for="cf-dtype">Discount</label>
+              <select id="cf-dtype"><option value="percent">Percent off</option><option value="fixed">Euros off</option></select></div>
+            <div class="f cf-promo"><label for="cf-dvalue">Amount</label><input id="cf-dvalue" type="number" min="1" step="1" placeholder="10"><span class="hint" id="cf-dhint">Percent, 1–100</span></div>
+            <div class="f cf-media" hidden><label for="cf-owner">Owner Discord ID</label><input id="cf-owner" inputmode="numeric" placeholder="123456789012345678"><span class="hint">Right-click the user in Discord → Copy User ID</span></div>
+            <div class="f cf-media" hidden><label for="cf-owner-name">Owner name (optional)</label><input id="cf-owner-name" maxlength="100" placeholder="Exasty"></div>
+            <div class="f"><label for="cf-max">Max uses (optional)</label><input id="cf-max" type="number" min="1" step="1" placeholder="Unlimited"></div>
+            <div class="f"><label for="cf-per">Per customer (optional)</label><input id="cf-per" type="number" min="1" step="1" placeholder="Unlimited"></div>
+            <div class="f"><label for="cf-expires">Expires (optional)</label><input id="cf-expires" type="datetime-local"></div>
+            <div class="f"><label>Products</label>
+              <div class="checks"><label><input type="checkbox" value="monthly" checked> Monthly</label><label><input type="checkbox" value="lifetime" checked> Lifetime</label></div></div>
+            <div class="f full"><label for="cf-notes">Notes (optional, staff only)</label><input id="cf-notes" maxlength="300"></div>
+          </div>
+          <div class="form-actions"><button class="btn-imgup" type="submit" id="cf-submit">Create code</button><span class="msg" id="cf-msg" aria-live="polite"></span></div>
+        </form>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-head"><div><h3>All codes</h3><div class="sub">Disable a code to stop it working at checkout straight away.</div></div></div>
+        <div class="toolbar">
+          <input id="codes-search" type="search" placeholder="Search code, owner name or ID" aria-label="Search codes">
+          <select id="codes-type" aria-label="Type"><option value="">All types</option><option value="media">Media</option><option value="promo">Promo</option></select>
+          <select id="codes-status" aria-label="Status"><option value="">Any status</option><option value="active">Active</option><option value="disabled">Disabled</option></select>
+        </div>
+        <div class="rows" id="codes-list"><div class="loading-note">Loading…</div></div>
+      </div>
+    </div>
+    <!-- /TAB: CODES -->
+
+    <!-- TAB: PAYOUTS (finance admins) -->
+    <div class="tab-panel" id="tab-payouts" style="display:none">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Finance admin</div>
+        <h1 class="dash-title">Media <em>payouts</em></h1>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-head">
+          <div><h3>Withdrawal requests</h3><div class="sub">Send the money yourself, then mark it paid with the reference. Approved is not the same as paid.</div></div>
+          <div class="toolbar" style="margin:0"><select id="wd-filter" aria-label="Filter"><option value="open">Open</option><option value="closed">Closed</option><option value="all">All</option></select></div>
+        </div>
+        <div class="rows" id="wd-list"><div class="loading-note">Loading…</div></div>
+      </div>
+
+      <div class="panel-box">
+        <h3>Money settings</h3>
+        <div class="sub">Apply to new media codes and new withdrawals. Every change is logged.</div>
+        <form id="settings-form">
+          <div class="form-grid">
+            <div class="f"><label for="st-discount">Customer discount per media code (cents)</label><input id="st-discount" type="number" min="0" max="10000" step="1"></div>
+            <div class="f"><label for="st-commission">Commission per sale (cents)</label><input id="st-commission" type="number" min="0" max="10000" step="1"></div>
+            <div class="f"><label for="st-min">Minimum withdrawal (cents)</label><input id="st-min" type="number" min="100" step="1"></div>
+            <div class="f"><label for="st-hold">Hold before withdrawable (days)</label><input id="st-hold" type="number" min="0" max="180" step="1"><span class="hint">Protects against refunds. 0 = available straight away.</span></div>
+          </div>
+          <div class="form-actions"><button class="btn-imgup" type="submit">Save settings</button><span class="msg" id="st-msg" aria-live="polite"></span></div>
+        </form>
+      </div>
+    </div>
+    <!-- /TAB: PAYOUTS -->
+
     </div>
 
   </main>
@@ -1207,6 +1406,17 @@ const DISCORD_CLIENT_ID = '1555931215180079236';
 // This exact URL must be listed under OAuth2 → Redirects in the Discord Developer Portal.
 const REDIRECT_URI      = window.location.origin + window.location.pathname;
 const API_URL            = 'https://blizzardapi.exasty.workers.dev';
+
+// Every request to the API carries the Discord login, so the server can check
+// who is asking instead of trusting a discord_id sent by the browser.
+const _plainFetch = window.fetch.bind(window);
+window.fetch = (url, opts = {}) => {
+  const token = localStorage.getItem('blizz_dc_token');
+  if (token && typeof url === 'string' && url.startsWith(API_URL)) {
+    opts = { ...opts, headers: { ...(opts.headers || {}), Authorization: 'Bearer ' + token } };
+  }
+  return _plainFetch(url, opts);
+};
 
 // ── CURSOR ────────────────────────────────────────────────────
 const $cursor = document.getElementById('cursor');
@@ -1253,7 +1463,7 @@ function showLogin()     { document.getElementById('screen-login').style.display
 function showDashboard() { document.getElementById('screen-login').style.display = 'none'; document.getElementById('screen-dashboard').style.display = 'block'; }
 
 // ── SIDEBAR / TABS ────────────────────────────────────────────
-const TABS = ['dashboard', 'reviews', 'clips', 'peeks'];
+const TABS = ['dashboard', 'reviews', 'clips', 'peeks', 'media', 'codes', 'payouts'];
 
 function switchTab(tab) {
   TABS.forEach(t => {
@@ -1336,6 +1546,7 @@ async function renderDashboard(user) {
 
   showDashboard();
   CURRENT_USER = user;
+  if (typeof setupRoleTabs === 'function') setupRoleTabs(user);   // Media / Codes / Payouts tabs
 
   // ── Check API for existing license ──
   try {
@@ -2320,5 +2531,441 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 });
 </script>
 
+
+<script>
+// ── MEDIA / CODES / PAYOUTS ───────────────────────────────────
+// Tabs appear only for people the server says may see them; every action is
+// checked again on the server, so hiding a tab is a convenience, not security.
+(function () {
+  const $ = id => document.getElementById(id);
+  const eur = c => (c < 0 ? '−' : '') + '€' + (Math.abs(c || 0) / 100).toFixed(2);
+  const esc = s => escapeHtml(String(s ?? ''));
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  const loaded = {};
+
+  async function api(path, opts = {}) {
+    const res = await fetch(API_URL + path, {
+      ...opts,
+      headers: { ...(opts.body && !(opts.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}), ...(opts.headers || {}) },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+    return data;
+  }
+
+  const STATUS_BADGE = {
+    available: 'green', pending: 'yellow', withdrawal_pending: 'violet', paid: 'pink', reversed: 'red',
+    requested: 'yellow', under_review: 'yellow', approved: 'violet', processing: 'violet', rejected: 'red', cancelled: '',
+    active: 'green', disabled: 'red', media: 'pink', promo: 'violet',
+  };
+  const LABEL = { withdrawal_pending: 'in withdrawal', under_review: 'under review' };
+  const badge = s => `<span class="badge ${STATUS_BADGE[s] || ''}">${esc(LABEL[s] || s)}</span>`;
+  const PAYOUT = { paypal: 'PayPal', usdt_trc20: 'USDT (TRC20)', usdt_erc20: 'USDT (ERC20)', ltc: 'Litecoin', btc: 'Bitcoin' };
+  const payoutName = m => PAYOUT[m] || m;
+
+  // ── Tab visibility ──────────────────────────────────────────
+  window.setupRoleTabs = async function (user) {
+    let access = {};
+    try { access = await api(`/access/${user.id}`); } catch { return; }
+    $('menu-media').style.display = access.is_media ? 'flex' : 'none';
+    $('menu-codes').style.display = access.is_dev ? 'flex' : 'none';
+    $('menu-payouts').style.display = access.is_finance ? 'flex' : 'none';
+  };
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    ['menu-media', 'menu-codes', 'menu-payouts'].forEach(id => { $(id).style.display = 'none'; });
+    Object.keys(loaded).forEach(k => delete loaded[k]);
+  });
+  document.querySelectorAll('.menu-item[data-tab="media"], .menu-item[data-tab="codes"], .menu-item[data-tab="payouts"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      if (loaded[tab]) return;
+      loaded[tab] = true;
+      ({ media: loadMedia, codes: loadCodes, payouts: loadPayouts })[tab]();
+    });
+  });
+
+  // ── Bar chart (single series, one axis, hover + table view) ─
+  function barChart(el, points, { title, sub, money = false }) {
+    const fmt = v => money ? eur(v) : String(v);
+    const W = 520, H = 170, L = 34, B = 22, T = 8, R = 6;
+    const max = Math.max(1, ...points.map(p => p.value));
+    const nice = money ? Math.ceil(max / 100) * 100 : Math.max(2, Math.ceil(max / 2) * 2);
+    const plotW = W - L - R, plotH = H - B - T, band = plotW / points.length, bw = Math.max(3, Math.min(18, band * 0.62));
+    const y = v => T + plotH - (v / nice) * plotH;
+    const ticks = [0, nice / 2, nice];
+    const every = points.length > 14 ? 5 : 1;
+
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}">`;
+    for (const t of ticks) svg += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="axis" x="${L - 6}" y="${y(t) + 3.5}" text-anchor="end">${money ? '€' + Math.round(t / 100) : t}</text>`;
+    points.forEach((p, i) => {
+      const cx = L + band * i + band / 2, x = cx - bw / 2, top = y(p.value), h = T + plotH - top;
+      const r = Math.min(4, h, bw / 2);
+      const bar = h > 0 ? `<path class="bar" d="M${x},${T + plotH} V${top + r} Q${x},${top} ${x + r},${top} H${x + bw - r} Q${x + bw},${top} ${x + bw},${top + r} V${T + plotH} Z"/>` : '<path class="bar" d=""/>';
+      svg += `<rect class="hit" data-i="${i}" x="${L + band * i}" y="${T}" width="${band}" height="${plotH}"/>${bar}`;
+      if (i % every === 0 || i === points.length - 1) svg += `<text class="axis" x="${cx}" y="${H - 6}" text-anchor="middle">${esc(p.short)}</text>`;
+    });
+    svg += '</svg>';
+    const table = `<div class="chart-table-wrap" hidden><table class="chart-table"><thead><tr><th>${esc(points.label || 'Date')}</th><th>${esc(title)}</th></tr></thead><tbody>` +
+      points.map(p => `<tr><td>${esc(p.long)}</td><td>${fmt(p.value)}</td></tr>`).join('') + '</tbody></table></div>';
+
+    el.innerHTML = `<div class="chart-head"><div><h4>${esc(title)}</h4><div class="chart-sub">${esc(sub)}</div></div>
+      <button class="chart-toggle" type="button">Table</button></div><div class="chart-area">${svg}</div>${table}`;
+    const tip = document.createElement('div');
+    tip.className = 'chart-tip'; tip.hidden = true;
+    el.appendChild(tip);
+    el.querySelectorAll('.hit').forEach(h => {
+      h.addEventListener('mouseenter', () => {
+        const p = points[h.dataset.i];
+        const svgEl = el.querySelector('svg'), box = svgEl.getBoundingClientRect(), host = el.getBoundingClientRect();
+        const scale = box.width / W;
+        tip.innerHTML = `${fmt(p.value)}<span>${esc(p.long)}</span>`;
+        tip.style.left = (box.left - host.left + (L + band * h.dataset.i + band / 2) * scale) + 'px';
+        tip.style.top = (box.top - host.top + Math.min(y(p.value), T + plotH - 2) * scale - 8) + 'px';
+        tip.hidden = false;
+      });
+      h.addEventListener('mouseleave', () => { tip.hidden = true; });
+    });
+    el.querySelector('.chart-toggle').onclick = e => {
+      const tbl = el.querySelector('.chart-table-wrap'), area = el.querySelector('.chart-area');
+      const showTable = tbl.hidden;
+      tbl.hidden = !showTable; area.hidden = showTable;
+      e.target.textContent = showTable ? 'Chart' : 'Table';
+    };
+  }
+
+  // ── MEDIA ───────────────────────────────────────────────────
+  async function loadMedia() {
+    const body = $('media-body');
+    try {
+      const [me, stats, com, wds] = await Promise.all([
+        api('/media/me'), api('/media/stats'), api('/media/commissions'), api('/media/withdrawals'),
+      ]);
+      renderMedia(me, stats, com.commissions, wds.withdrawals);
+    } catch (e) {
+      body.innerHTML = `<div class="empty-note">Could not load your media stats: ${esc(e.message)}</div>`;
+      loaded.media = false;
+    }
+  }
+
+  function renderMedia(me, stats, commissions, withdrawals) {
+    const b = me.balance, c = me.codes[0];
+    const min = me.settings.min_withdrawal_cents;
+    const open = withdrawals.find(w => ['requested', 'under_review', 'approved', 'processing'].includes(w.status));
+
+    $('media-body').innerHTML = `
+      <div class="panel-box code-hero">
+        <div>
+          <div class="label">${me.codes.length > 1 ? 'Your codes' : 'Your code'}</div>
+          <div class="code">${me.codes.map(x => esc(x.code)).join(' · ')}</div>
+          <div class="terms">Customers save <b>${eur(c.discount_cents)}</b> · you earn <b>${eur(c.commission_cents)}</b> per paid order${c.status !== 'active' ? ' · <span class="badge red">disabled</span>' : ''}</div>
+        </div>
+        <button class="key-btn" type="button" id="copy-media-code">Copy code</button>
+      </div>
+
+      <div class="tiles">
+        <div class="tile hl"><div class="k">Available</div><div class="v">${eur(b.available_cents)}</div><div class="s">ready to withdraw</div></div>
+        <div class="tile"><div class="k">Total earned</div><div class="v">${eur(b.earned_cents)}</div><div class="s">all time</div></div>
+        <div class="tile"><div class="k">Successful purchases</div><div class="v">${b.sales}</div><div class="s">paid orders with your code</div></div>
+        <div class="tile"><div class="k">Withdrawn</div><div class="v">${eur(b.withdrawn_cents)}</div><div class="s">paid out to you</div></div>
+      </div>
+      <div class="tiles small">
+        <div class="tile"><div class="k">Pending</div><div class="v">${eur(b.pending_cents)}</div><div class="s">${me.settings.hold_days ? `held ${me.settings.hold_days} days` : 'none on hold'}</div></div>
+        <div class="tile"><div class="k">In withdrawal</div><div class="v">${eur(b.reserved_cents)}</div><div class="s">being paid out</div></div>
+        <div class="tile"><div class="k">Customers saved</div><div class="v">${eur(me.stats.discounts_cents)}</div><div class="s">${me.stats.code_uses} code uses</div></div>
+        <div class="tile"><div class="k">Reversed</div><div class="v">${eur(b.reversed_cents)}</div><div class="s">refunded orders</div></div>
+      </div>
+
+      <div class="charts"><div class="chart-box" id="chart-daily"></div><div class="chart-box" id="chart-monthly"></div></div>
+
+      <div class="panel-box">
+        <h3>Withdraw</h3>
+        <div class="sub">Minimum ${eur(min)}. Only available money can be withdrawn; pending money becomes available after the hold period.</div>
+        <div id="wd-area"></div>
+      </div>
+
+      <div class="panel-box">
+        <h3>Recent sales</h3>
+        <div class="sub">Order details only. Customer information stays private.</div>
+        <div class="rows" id="sales-rows">${commissions.length ? commissions.map((x, i) => `
+          <div class="row"${i >= 10 ? ' hidden' : ''}><div class="main"><div class="title">${esc(x.order_ref)} ${badge(x.status)}</div>
+            <div class="meta">${esc(x.product)} · ${esc(x.code)} · ${fmtDate(x.created_at)}${x.note ? ' · ' + esc(x.note) : ''}</div></div>
+            <div class="right"><div class="amount ${x.amount_cents < 0 ? 'neg' : ''}">${eur(x.amount_cents)}</div></div></div>`).join('')
+          : '<div class="empty-note">No sales yet. Share your code with your viewers!</div>'}</div>
+        ${commissions.length > 10 ? `<div class="form-actions"><button class="mini-btn" type="button" id="sales-more">Show all ${commissions.length}</button></div>` : ''}
+      </div>
+
+      <div class="panel-box">
+        <h3>Withdrawal history</h3>
+        <div class="rows">${withdrawals.length ? withdrawals.map(w => `
+          <div class="row"><div class="main"><div class="title">${esc(w.ref)} ${badge(w.status)}</div>
+            <div class="meta">${esc(payoutName(w.payout_method))} · ${esc(w.payout_hint)} · requested ${fmtDate(w.requested_at)}${w.paid_at ? ' · paid ' + fmtDate(w.paid_at) : ''}${w.payout_reference ? ' · ref ' + esc(w.payout_reference) : ''}${w.reject_reason ? ' · ' + esc(w.reject_reason) : ''}</div></div>
+            <div class="right"><div class="amount">${eur(w.amount_cents)}</div>
+            ${w.status === 'requested' ? `<div class="actions"><button class="mini-btn danger" data-cancel="${w.id}">Cancel</button></div>` : ''}</div></div>`).join('')
+          : '<div class="empty-note">No withdrawals yet.</div>'}</div>
+      </div>`;
+
+    if ($('sales-more')) $('sales-more').onclick = e => { $('sales-rows').querySelectorAll('.row[hidden]').forEach(r => { r.hidden = false; }); e.target.remove(); };
+    $('copy-media-code').onclick = e => navigator.clipboard.writeText(c.code).then(() => { e.target.textContent = 'Copied!'; setTimeout(() => (e.target.textContent = 'Copy code'), 1500); });
+
+    const daily = stats.daily.map(d => {
+      const dt = new Date(d.day + 'T00:00:00');
+      return { value: d.purchases, short: dt.getDate() + '', long: dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) };
+    });
+    const monthly = stats.monthly.map(m => {
+      const dt = new Date(m.month + '-01T00:00:00');
+      return { value: m.commission_cents, short: dt.toLocaleDateString('en-GB', { month: 'short' }), long: dt.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) };
+    });
+    monthly.label = 'Month';
+    barChart($('chart-daily'), daily, { title: 'Purchases', sub: 'Paid orders with your code, last 30 days' });
+    barChart($('chart-monthly'), monthly, { title: 'Commission earned', sub: 'Per month, last 12 months', money: true });
+
+    // Withdrawal form
+    const area = $('wd-area');
+    if (!me.withdrawals_enabled) {
+      area.innerHTML = '<div class="empty-note">Withdrawals are not switched on yet. Ask staff.</div>';
+    } else if (open) {
+      area.innerHTML = `<div class="empty-note">Your withdrawal <b>${esc(open.ref)}</b> (${eur(open.amount_cents)}) is ${esc(LABEL[open.status] || open.status)}. You can request another once it's done.</div>`;
+    } else if (b.available_cents < min) {
+      const pct = Math.max(0, Math.min(100, Math.round(b.available_cents / min * 100)));
+      area.innerHTML = `<div class="bar-track" style="margin:4px 0 8px"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-sub">${eur(Math.max(0, b.available_cents))} of ${eur(min)} · ${eur(min - Math.max(0, b.available_cents))} to go</div>`;
+    } else {
+      area.innerHTML = `<form id="wd-form" autocomplete="off"><div class="form-grid">
+          <div class="f"><label for="wd-amount">Amount (€)</label><input id="wd-amount" type="number" min="${min / 100}" max="${b.available_cents / 100}" step="0.01" value="${(b.available_cents / 100).toFixed(2)}" required>
+            <span class="hint">Between ${eur(min)} and ${eur(b.available_cents)}</span></div>
+          <div class="f"><label for="wd-method">Payout method</label><select id="wd-method">${me.payout_methods.map(m => `<option value="${esc(m)}">${esc(payoutName(m))}</option>`).join('')}</select></div>
+          <div class="f full"><label for="wd-details" id="wd-details-label">PayPal email</label><input id="wd-details" maxlength="200" required></div>
+        </div>
+        <div class="form-actions"><button class="btn-imgup" type="submit" id="wd-submit">Request withdrawal</button><span class="msg" id="wd-msg" aria-live="polite"></span></div>
+        <p class="hint" style="font-size:13px;color:var(--dim2);margin-top:10px">This is a request. Staff review it and send the money by hand, then mark it paid.</p></form>`;
+      const setLabel = () => { $('wd-details-label').textContent = $('wd-method').value === 'paypal' ? 'PayPal email' : 'Wallet address'; };
+      $('wd-method').onchange = setLabel; setLabel();
+      $('wd-form').onsubmit = async e => {
+        e.preventDefault();
+        const msg = $('wd-msg'), btn = $('wd-submit');
+        const cents = Math.round(parseFloat($('wd-amount').value) * 100);
+        if (!confirm(`Request a withdrawal of ${eur(cents)} to ${$('wd-details').value}?`)) return;
+        btn.disabled = true; msg.className = 'msg'; msg.textContent = '';
+        try {
+          await api('/media/withdrawals', { method: 'POST', body: JSON.stringify({ amount_cents: cents, payout_method: $('wd-method').value, payout_details: $('wd-details').value.trim() }) });
+          toast('Withdrawal requested.', 'green');
+          loadMedia();
+        } catch (err) {
+          msg.className = 'msg err'; msg.textContent = '✗ ' + err.message; btn.disabled = false;
+        }
+      };
+    }
+    document.querySelectorAll('[data-cancel]').forEach(btn => btn.onclick = async () => {
+      if (!confirm('Cancel this withdrawal? The money goes back to your available balance.')) return;
+      btn.disabled = true;
+      try { await api(`/media/withdrawals/${btn.dataset.cancel}/cancel`, { method: 'POST' }); toast('Withdrawal cancelled.', 'green'); loadMedia(); }
+      catch (err) { toast(err.message, 'red'); btn.disabled = false; }
+    });
+  }
+
+  // ── CODES ───────────────────────────────────────────────────
+  async function loadCodes() {
+    setupCodeForm();
+    loadCodeOverview();
+    loadCodeList();
+    let t;
+    $('codes-search').oninput = () => { clearTimeout(t); t = setTimeout(loadCodeList, 250); };
+    $('codes-type').onchange = loadCodeList;
+    $('codes-status').onchange = loadCodeList;
+  }
+
+  async function loadCodeOverview() {
+    try {
+      const o = await api('/admin/codes/overview');
+      $('codes-overview').innerHTML = `
+        <div class="tile"><div class="k">Active codes</div><div class="v">${o.active_codes}</div><div class="s">${o.media_codes} media · ${o.promo_codes} promo</div></div>
+        <div class="tile"><div class="k">Redemptions</div><div class="v">${o.redemptions}</div><div class="s">paid orders with a code</div></div>
+        <div class="tile"><div class="k">Discounts given</div><div class="v">${eur(o.discounts_cents)}</div><div class="s">all codes</div></div>
+        <div class="tile"><div class="k">Media codes</div><div class="v">${o.media_codes}</div><div class="s">creators</div></div>`;
+    } catch (e) { $('codes-overview').innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
+  }
+
+  function setupCodeForm() {
+    const type = $('cf-type'), dtype = $('cf-dtype');
+    const sync = () => {
+      const media = type.value === 'media';
+      document.querySelectorAll('.cf-promo').forEach(el => { el.hidden = media; });
+      document.querySelectorAll('.cf-media').forEach(el => { el.hidden = !media; });
+      $('cf-dhint').textContent = dtype.value === 'percent' ? 'Percent, 1–100' : 'Euros, e.g. 2.50';
+      $('cf-dvalue').step = dtype.value === 'percent' ? '1' : '0.01';
+    };
+    type.onchange = sync; dtype.onchange = sync; sync();
+
+    $('code-form').onsubmit = async e => {
+      e.preventDefault();
+      const msg = $('cf-msg'), btn = $('cf-submit');
+      const products = [...document.querySelectorAll('#code-form .checks input:checked')].map(i => i.value);
+      if (!products.length) { msg.className = 'msg err'; msg.textContent = 'Pick at least one product.'; return; }
+      const body = {
+        code: $('cf-code').value.trim().toUpperCase(), type: type.value,
+        products: products.length === 2 ? null : products,
+        max_uses: $('cf-max').value || null, per_customer_limit: $('cf-per').value || null,
+        expires_at: $('cf-expires').value ? new Date($('cf-expires').value).toISOString() : null,
+        notes: $('cf-notes').value.trim() || null,
+      };
+      if (type.value === 'media') {
+        body.owner_discord_id = $('cf-owner').value.trim();
+        body.owner_username = $('cf-owner-name').value.trim() || null;
+      } else {
+        body.discount_type = dtype.value;
+        const v = parseFloat($('cf-dvalue').value);
+        body.discount_value = dtype.value === 'percent' ? Math.round(v) : Math.round(v * 100);
+      }
+      btn.disabled = true; msg.className = 'msg'; msg.textContent = '';
+      try {
+        const r = await api('/admin/codes', { method: 'POST', body: JSON.stringify(body) });
+        msg.className = 'msg ok'; msg.textContent = `✓ ${r.code.code} created.`;
+        $('code-form').reset(); sync();
+        loadCodeOverview(); loadCodeList();
+      } catch (err) { msg.className = 'msg err'; msg.textContent = '✗ ' + err.message; }
+      btn.disabled = false;
+    };
+  }
+
+  function discountText(c) {
+    return c.discount_type === 'percent' ? `${c.discount_value}% off` : `${eur(c.discount_value)} off`;
+  }
+
+  async function loadCodeList() {
+    const list = $('codes-list');
+    const qs = new URLSearchParams({ search: $('codes-search').value.trim(), type: $('codes-type').value, status: $('codes-status').value });
+    try {
+      const { codes } = await api('/admin/codes?' + qs);
+      if (!codes.length) { list.innerHTML = '<div class="empty-note">No codes match.</div>'; return; }
+      list.innerHTML = codes.map(c => `
+        <div class="row" data-code-id="${c.id}">
+          <div class="main">
+            <div class="title"><span style="font-family:var(--mono)">${esc(c.code)}</span> ${badge(c.type)} ${badge(c.status)}</div>
+            <div class="meta">${discountText(c)}${c.type === 'media' ? ` · ${eur(c.commission_cents)} commission · owner ${esc(c.owner_username || '')} (${esc(c.owner_discord_id)})` : ''}
+              · ${c.redemptions} paid uses${c.max_uses ? ` of ${c.max_uses}` : ''}${c.per_customer_limit ? ` · ${c.per_customer_limit} per customer` : ''}
+              ${c.products ? ` · ${esc(c.products.join(', '))} only` : ''}${c.expires_at ? ` · expires ${fmtDate(c.expires_at)}` : ''}
+              · discounts ${eur(c.discounts_cents)}${c.type === 'media' ? ` · earned ${eur(c.commissions_cents)}` : ''}</div>
+          </div>
+          <div class="right"><div class="actions" style="margin-top:0">
+            <button class="mini-btn" data-history="${c.id}">History</button>
+            <button class="mini-btn ${c.status === 'active' ? 'danger' : 'primary'}" data-toggle="${c.id}" data-to="${c.status === 'active' ? 'disabled' : 'active'}">${c.status === 'active' ? 'Disable' : 'Enable'}</button>
+          </div></div>
+        </div>`).join('');
+      list.querySelectorAll('[data-toggle]').forEach(btn => btn.onclick = async () => {
+        if (btn.dataset.to === 'disabled' && !confirm('Disable this code? It stops working at checkout straight away.')) return;
+        btn.disabled = true;
+        try { await api(`/admin/codes/${btn.dataset.toggle}`, { method: 'PATCH', body: JSON.stringify({ status: btn.dataset.to }) }); toast('Code updated.', 'green'); loadCodeList(); loadCodeOverview(); }
+        catch (err) { toast(err.message, 'red'); btn.disabled = false; }
+      });
+      list.querySelectorAll('[data-history]').forEach(btn => btn.onclick = async () => {
+        const row = btn.closest('.row');
+        const open = row.querySelector('.detail');
+        if (open) { open.remove(); return; }
+        const d = document.createElement('div');
+        d.className = 'detail'; d.innerHTML = '<div class="loading-note">Loading…</div>';
+        row.appendChild(d);
+        try {
+          const { redemptions } = await api(`/admin/codes/${btn.dataset.history}/redemptions`);
+          d.innerHTML = redemptions.length ? `<table class="chart-table"><thead><tr><th>Order</th><th>Product</th><th>Status</th><th>Date</th><th>Discount</th></tr></thead><tbody>` +
+            redemptions.map(r => `<tr><td>${esc(r.ref)}</td><td>${esc(r.product)}</td><td>${badge(r.status === 'completed' ? 'paid' : r.status)}</td><td>${fmtDate(r.created_at)}</td><td>${eur(r.discount_cents)}</td></tr>`).join('') + '</tbody></table>'
+            : '<div class="empty-note">Not used yet.</div>';
+        } catch (err) { d.innerHTML = `<div class="empty-note">${esc(err.message)}</div>`; }
+      });
+    } catch (e) { list.innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
+  }
+
+  // ── PAYOUTS ─────────────────────────────────────────────────
+  async function loadPayouts() {
+    $('wd-filter').onchange = loadWithdrawals;
+    loadWithdrawals();
+    loadSettings();
+  }
+
+  async function loadWithdrawals() {
+    const list = $('wd-list');
+    try {
+      const { withdrawals } = await api('/admin/withdrawals?status=' + $('wd-filter').value);
+      if (!withdrawals.length) { list.innerHTML = '<div class="empty-note">Nothing here.</div>'; return; }
+      list.innerHTML = withdrawals.map(w => `
+        <div class="row" data-wd="${w.id}">
+          <div class="main"><div class="title">${esc(w.ref)} ${badge(w.status)}</div>
+            <div class="meta">${esc(w.media_username || '')} (${esc(w.media_discord_id)}) · ${esc(payoutName(w.payout_method))} · requested ${fmtDate(w.requested_at)}</div></div>
+          <div class="right"><div class="amount">${eur(w.amount_cents)}</div><div class="actions"><button class="mini-btn" data-review="${w.id}">Review</button></div></div>
+        </div>`).join('');
+      list.querySelectorAll('[data-review]').forEach(btn => btn.onclick = () => toggleWithdrawal(btn.closest('.row'), btn.dataset.review));
+    } catch (e) { list.innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
+  }
+
+  const NEXT = {
+    requested: ['review', 'approve', 'reject'], under_review: ['approve', 'reject'],
+    approved: ['processing', 'mark-paid', 'reject'], processing: ['mark-paid', 'reject'],
+  };
+  const ACTION_LABEL = { review: 'Mark under review', approve: 'Approve', reject: 'Reject', processing: 'Mark processing', 'mark-paid': 'Mark paid' };
+
+  async function toggleWithdrawal(row, id) {
+    const open = row.querySelector('.detail');
+    if (open) { open.remove(); return; }
+    const d = document.createElement('div');
+    d.className = 'detail'; d.innerHTML = '<div class="loading-note">Loading…</div>';
+    row.appendChild(d);
+    try {
+      const { withdrawal: w, events, ledger } = await api(`/admin/withdrawals/${id}`);
+      const actions = NEXT[w.status] || [];
+      d.innerHTML = `
+        <div class="kv"><span>Send to</span><b>${esc(payoutName(w.payout_method))}: ${esc(w.payout_details)}</b>
+          <span>Amount</span><b>${eur(w.amount_cents)}</b>
+          ${w.payout_reference ? `<span>Reference</span><b>${esc(w.payout_reference)}</b>` : ''}
+          ${w.reject_reason ? `<span>Rejected</span><b>${esc(w.reject_reason)}</b>` : ''}</div>
+        <div class="timeline">${events.map(e => `<div>${fmtDate(e.created_at)} · ${esc(e.from_status || 'new')} → <b>${esc(e.to_status)}</b>${e.actor_discord_id ? ' by ' + esc(e.actor_discord_id) : ''}${e.note ? ' · ' + esc(e.note) : ''}</div>`).join('')}</div>
+        <details style="margin-bottom:12px"><summary style="cursor:pointer;color:var(--dim);font-size:13.5px">${ledger.length} ledger entries</summary>
+          <table class="chart-table" style="margin-top:8px"><thead><tr><th>Order</th><th>Type</th><th>Order status</th><th>Amount</th></tr></thead><tbody>
+          ${ledger.map(l => `<tr><td>${esc(l.order_ref)}</td><td>${esc(l.kind)}</td><td>${esc(l.order_status)}</td><td>${eur(l.amount_cents)}</td></tr>`).join('')}</tbody></table></details>
+        ${actions.length ? `<div class="form-grid">
+            ${actions.includes('reject') ? '<div class="f"><label>Reason (for reject)</label><input data-f="reason" maxlength="300"></div>' : ''}
+            ${actions.includes('mark-paid') ? '<div class="f"><label>Payment reference (for paid)</label><input data-f="reference" maxlength="200" placeholder="PayPal transaction ID or tx hash"></div>' : ''}
+          </div>
+          <div class="form-actions">${actions.map(a => `<button class="mini-btn ${a === 'reject' ? 'danger' : a === 'mark-paid' || a === 'approve' ? 'primary' : ''}" data-act="${a}">${ACTION_LABEL[a]}</button>`).join('')}
+          <span class="msg" data-f="msg"></span></div>` : ''}`;
+      d.querySelectorAll('[data-act]').forEach(btn => btn.onclick = async () => {
+        const act = btn.dataset.act;
+        const reason = d.querySelector('[data-f="reason"]')?.value.trim();
+        const reference = d.querySelector('[data-f="reference"]')?.value.trim();
+        const msg = d.querySelector('[data-f="msg"]');
+        if (act === 'reject' && !reason) { msg.className = 'msg err'; msg.textContent = 'Add a reason first.'; return; }
+        if (act === 'mark-paid' && !reference) { msg.className = 'msg err'; msg.textContent = 'Add the payment reference first.'; return; }
+        if (act === 'mark-paid' && !confirm(`Confirm you have sent ${eur(w.amount_cents)} to ${w.payout_details}?`)) return;
+        d.querySelectorAll('[data-act]').forEach(b => { b.disabled = true; });
+        try {
+          await api(`/admin/withdrawals/${id}/${act}`, { method: 'POST', body: JSON.stringify({ reason, reference }) });
+          toast(`${w.ref}: ${ACTION_LABEL[act].toLowerCase()} ✓`, 'green');
+          loadWithdrawals();
+        } catch (err) {
+          msg.className = 'msg err'; msg.textContent = '✗ ' + err.message;
+          d.querySelectorAll('[data-act]').forEach(b => { b.disabled = false; });
+        }
+      });
+    } catch (e) { d.innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
+  }
+
+  async function loadSettings() {
+    try {
+      const { settings: s } = await api('/admin/settings');
+      $('st-discount').value = s.media_discount_cents; $('st-commission').value = s.media_commission_cents;
+      $('st-min').value = s.min_withdrawal_cents; $('st-hold').value = s.commission_hold_days;
+    } catch (e) { $('st-msg').className = 'msg err'; $('st-msg').textContent = e.message; }
+    $('settings-form').onsubmit = async e => {
+      e.preventDefault();
+      if (!confirm('Save these money settings? They apply to new codes and new withdrawals.')) return;
+      const msg = $('st-msg');
+      try {
+        await api('/admin/settings', { method: 'PATCH', body: JSON.stringify({
+          media_discount_cents: +$('st-discount').value, media_commission_cents: +$('st-commission').value,
+          min_withdrawal_cents: +$('st-min').value, commission_hold_days: +$('st-hold').value }) });
+        msg.className = 'msg ok'; msg.textContent = '✓ Saved.';
+      } catch (err) { msg.className = 'msg err'; msg.textContent = '✗ ' + err.message; }
+    };
+  }
+})();
+</script>
 </body>
 </html>
