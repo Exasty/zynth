@@ -2,7 +2,7 @@
 
 // ── SETTINGS: change these in one place ─────────────────────────
 // The Zynth backend (server.js). Must match API_URL in dashboard.html.
-window.ZYNTH_API_URL = 'https://blizzardapi.exasty.workers.dev';
+window.ZYNTH_API_URL = 'https://license-api.exasty.workers.dev';
 // Discord application (Developer Portal → OAuth2 → Client ID). Must match dashboard.html.
 window.ZYNTH_DISCORD_CLIENT_ID = '1555931215180079236';
 

@@ -1621,7 +1621,7 @@ function applyLicense(lic, user) {
   if (!isExpired && user) {
     const dlBtn = document.getElementById('btn-download');
     dlBtn.classList.remove('locked');
-    dlBtn.href = `${API_URL}/download/blizzard-1.0.0.jar?discord_id=${encodeURIComponent(user.id)}&key=${encodeURIComponent(fullKey)}`;
+    dlBtn.href = `${API_URL}/download/zynth-client.jar?discord_id=${encodeURIComponent(user.id)}&key=${encodeURIComponent(fullKey)}`;
     document.getElementById('dl-desc').textContent = 'Fabric 1.21.11 · Needs Fabric API and Java 21+';
   }
 
@@ -1685,7 +1685,7 @@ async function loadStaffActions() {
             <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim2);">${when}</span>
           </div>
           <div class="review-item-text">
-            Executed on target <code>${escapeHtml(a.target_discord_id)}</code> — key ${a.key_revoked ? `<code>${escapeHtml(a.key_revoked)}</code>` : 'none on file'}, banned: ${a.banned ? 'yes' : 'no'}.
+            Executed on target <code>${escapeHtml(a.target_discord_id)}</code> — key ${a.key_revoked ? `<code>${escapeHtml(a.key_revoked)}</code>` : 'none on file'}, banned: ${a.banned === 'queued' ? 'in progress' : a.banned ? 'yes' : 'no'}.
             ${a.reason ? `<br>Reason: ${escapeHtml(a.reason)}` : ''}
           </div>
         </div>`;
@@ -1731,7 +1731,7 @@ async function revokeUser(targetDiscordId, btn) {
     });
     const result = await res.json();
     if (result.success) {
-      toast('License revoked and user banned.', 'green');
+      toast(result.ban_queued ? 'License revoked. The bot is banning them now.' : 'License revoked and user banned.', 'green');
       loadReviews(); loadClips();
     } else {
       toast(result.error || `Failed to execute (${res.status}).`, 'red');
@@ -2567,7 +2567,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   window.setupRoleTabs = async function (user) {
     let access = {};
     try { access = await api(`/access/${user.id}`); } catch { return; }
-    $('menu-media').style.display = access.is_media ? 'flex' : 'none';
+    $('menu-media').style.display = 'flex';
     $('menu-codes').style.display = access.is_dev ? 'flex' : 'none';
     $('menu-payouts').style.display = access.is_finance ? 'flex' : 'none';
   };
@@ -2637,6 +2637,8 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   async function loadMedia() {
     const body = $('media-body');
     try {
+      const app = await api('/media/application');
+      if (!app.partner) return renderApplication(app);
       const [me, stats, com, wds] = await Promise.all([
         api('/media/me'), api('/media/stats'), api('/media/commissions'), api('/media/withdrawals'),
       ]);
@@ -2647,8 +2649,65 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     }
   }
 
+  // Not a partner (yet): application status + form.
+  function renderApplication(app) {
+    const PLATFORM = { youtube: 'YouTube', tiktok: 'TikTok', twitch: 'Twitch', instagram: 'Instagram', x: 'X / Twitter', kick: 'Kick', other: 'Other' };
+    const pending = app.applications.find(a => a.status === 'pending');
+    const last = app.applications[0];
+    const body = $('media-body');
+    if (pending) {
+      body.innerHTML = `<div class="panel-box"><div class="label">Application #${pending.id}</div>
+        <p style="margin:8px 0">Your application is <span class="badge yellow">waiting for review</span>. You'll get a Discord DM when a Dev decides.</p>
+        <div class="kv"><span>Channel</span><b>${esc(pending.channel_url)}</b></div>
+        <div class="kv"><span>Payout</span><b>${esc(payoutName(pending.payout_method))} · ${esc(pending.payout_hint)}</b></div>
+        <div class="form-actions"><button class="btn-imgup" id="app-cancel">Cancel application</button></div></div>`;
+      $('app-cancel').onclick = async () => {
+        if (!confirm('Cancel your application?')) return;
+        try { await api(`/media/application/${pending.id}/cancel`, { method: 'POST' }); toast('Application cancelled.', 'green'); loadMedia(); }
+        catch (e) { toast(e.message, 'red'); }
+      };
+      return;
+    }
+    const note = last && last.status === 'rejected'
+      ? `<div class="empty-note" style="margin-bottom:14px">Your last application was rejected${last.rejection_reason ? `: <b>${esc(last.rejection_reason)}</b>` : '.'} You can apply again 7 days after the decision.</div>` : '';
+    if (!app.applications_open) {
+      body.innerHTML = note + '<div class="empty-note">Media applications are not open yet. Check back soon.</div>';
+      return;
+    }
+    body.innerHTML = `${note}<div class="panel-box"><div class="label">Apply to become a media partner</div>
+      <p class="hint" style="font-size:13px;color:var(--dim2);margin:6px 0 14px">Approved partners get a media license, their own creator code, and commission on every paid order that uses it. Your payout details are encrypted and only finance admins can see them.</p>
+      <form id="app-form" autocomplete="off"><div class="form-grid">
+        <div class="f"><label for="ap-platform">Platform</label><select id="ap-platform" required>${app.platforms.map(p => `<option value="${esc(p)}">${esc(PLATFORM[p] || p)}</option>`).join('')}</select></div>
+        <div class="f"><label for="ap-audience">Followers / subscribers</label><input id="ap-audience" type="number" min="0" step="1"></div>
+        <div class="f full"><label for="ap-url">Channel link</label><input id="ap-url" type="url" maxlength="300" placeholder="https://" required></div>
+        <div class="f full"><label for="ap-reason">Why do you want to partner with Zynth?</label><textarea id="ap-reason" minlength="20" maxlength="1500" rows="4" required></textarea></div>
+        <div class="f"><label for="ap-code">Code you'd like (optional)</label><input id="ap-code" maxlength="24" placeholder="e.g. YOURNAME"></div>
+        <div class="f"><label for="ap-method">Payout method</label><select id="ap-method">${app.payout_methods.map(m => `<option value="${esc(m)}">${esc(payoutName(m))}</option>`).join('')}</select></div>
+        <div class="f full"><label for="ap-details" id="ap-details-label">PayPal email</label><input id="ap-details" maxlength="200" required></div>
+      </div>
+      <div class="form-actions"><button class="btn-imgup" type="submit" id="ap-submit">Send application</button><span class="msg" id="ap-msg" aria-live="polite"></span></div></form></div>`;
+    const setLabel = () => { $('ap-details-label').textContent = $('ap-method').value === 'paypal' ? 'PayPal email' : 'Wallet address'; };
+    $('ap-method').onchange = setLabel; setLabel();
+    $('app-form').onsubmit = async e => {
+      e.preventDefault();
+      const msg = $('ap-msg'), btn = $('ap-submit');
+      btn.disabled = true; msg.className = 'msg'; msg.textContent = '';
+      try {
+        await api('/media/application', { method: 'POST', body: JSON.stringify({
+          platform: $('ap-platform').value, channel_url: $('ap-url').value.trim(), audience_size: $('ap-audience').value,
+          application_reason: $('ap-reason').value.trim(), desired_code: $('ap-code').value.trim() || undefined,
+          payout_method: $('ap-method').value, payout_details: $('ap-details').value.trim(),
+        }) });
+        toast('Application sent.', 'green');
+        loadMedia();
+      } catch (err) {
+        msg.className = 'msg err'; msg.textContent = '✗ ' + err.message; btn.disabled = false;
+      }
+    };
+  }
+
   function renderMedia(me, stats, commissions, withdrawals) {
-    const b = me.balance, c = me.codes[0];
+    const b = me.balance, c = me.codes[0] || { code: '—', discount_cents: 0, commission_cents: 0, status: 'active' };
     const min = me.settings.min_withdrawal_cents;
     const open = withdrawals.find(w => ['requested', 'under_review', 'approved', 'processing'].includes(w.status));
 
@@ -2656,7 +2715,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       <div class="panel-box code-hero">
         <div>
           <div class="label">${me.codes.length > 1 ? 'Your codes' : 'Your code'}</div>
-          <div class="code">${me.codes.map(x => esc(x.code)).join(' · ')}</div>
+          <div class="code">${me.codes.length ? me.codes.map(x => esc(x.code)).join(' · ') : 'No code yet'}</div>
           <div class="terms">Customers save <b>${eur(c.discount_cents)}</b> · you earn <b>${eur(c.commission_cents)}</b> per paid order${c.status !== 'active' ? ' · <span class="badge red">disabled</span>' : ''}</div>
         </div>
         <button class="key-btn" type="button" id="copy-media-code">Copy code</button>
@@ -2733,21 +2792,19 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       area.innerHTML = `<form id="wd-form" autocomplete="off"><div class="form-grid">
           <div class="f"><label for="wd-amount">Amount (€)</label><input id="wd-amount" type="number" min="${min / 100}" max="${b.available_cents / 100}" step="0.01" value="${(b.available_cents / 100).toFixed(2)}" required>
             <span class="hint">Between ${eur(min)} and ${eur(b.available_cents)}</span></div>
-          <div class="f"><label for="wd-method">Payout method</label><select id="wd-method">${me.payout_methods.map(m => `<option value="${esc(m)}">${esc(payoutName(m))}</option>`).join('')}</select></div>
-          <div class="f full"><label for="wd-details" id="wd-details-label">PayPal email</label><input id="wd-details" maxlength="200" required></div>
+          <div class="f"><label>Paid to</label><input value="${esc(payoutName(me.payout.method))} · ${esc(me.payout.hint)}" disabled>
+            <span class="hint">${me.payout.pending_change ? 'A change is waiting for finance review.' : 'To change this, ask staff in a ticket.'}</span></div>
         </div>
         <div class="form-actions"><button class="btn-imgup" type="submit" id="wd-submit">Request withdrawal</button><span class="msg" id="wd-msg" aria-live="polite"></span></div>
         <p class="hint" style="font-size:13px;color:var(--dim2);margin-top:10px">This is a request. Staff review it and send the money by hand, then mark it paid.</p></form>`;
-      const setLabel = () => { $('wd-details-label').textContent = $('wd-method').value === 'paypal' ? 'PayPal email' : 'Wallet address'; };
-      $('wd-method').onchange = setLabel; setLabel();
       $('wd-form').onsubmit = async e => {
         e.preventDefault();
         const msg = $('wd-msg'), btn = $('wd-submit');
         const cents = Math.round(parseFloat($('wd-amount').value) * 100);
-        if (!confirm(`Request a withdrawal of ${eur(cents)} to ${$('wd-details').value}?`)) return;
+        if (!confirm(`Request a withdrawal of ${eur(cents)} to your ${payoutName(me.payout.method)} (${me.payout.hint})?`)) return;
         btn.disabled = true; msg.className = 'msg'; msg.textContent = '';
         try {
-          await api('/media/withdrawals', { method: 'POST', body: JSON.stringify({ amount_cents: cents, payout_method: $('wd-method').value, payout_details: $('wd-details').value.trim() }) });
+          await api('/media/withdrawals', { method: 'POST', body: JSON.stringify({ amount_cents: cents }) });
           toast('Withdrawal requested.', 'green');
           loadMedia();
         } catch (err) {
