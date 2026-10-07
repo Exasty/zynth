@@ -821,6 +821,74 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ── Main page (home) ─────────────────────────────────────────── */
+.h-hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); border: 1px solid var(--border); border-radius: 22px; overflow: hidden; margin-bottom: 16px;
+  background: radial-gradient(120% 160% at 0% 0%, rgba(255,77,166,.16), transparent 55%), var(--panel); }
+.h-hero-main { padding: 36px 38px; min-width: 0; }
+.h-hero-eyebrow { display: flex; align-items: center; gap: 12px; font: 600 12px/1 var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); margin-bottom: 14px; }
+.h-role { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border-bright); color: var(--text); font-size: 10.5px; letter-spacing: .12em; }
+.h-role.dev { color: var(--purple); border-color: rgba(167,139,250,.4); background: rgba(167,139,250,.1); }
+.h-role.staff { color: var(--green); border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.08); }
+.h-role.finance { color: var(--yellow); border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.08); }
+.h-role.media { color: var(--accent-light); border-color: rgba(255,77,166,.4); background: rgba(255,77,166,.1); }
+.h-hero-title { font: 700 clamp(38px, 5vw, 60px)/1 var(--display); color: var(--ink); margin-bottom: 22px; overflow-wrap: anywhere; }
+.h-hero-title em { font-style: normal; color: var(--accent); }
+.h-hero-status { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.h-chip { font: 600 13px/1 var(--font); color: var(--text); padding: 7px 12px; border-radius: 999px; background: var(--ghost-mid); border: 1px solid var(--border); }
+.h-hero-dl { padding: 32px 34px; border-left: 1px solid var(--border); background: rgba(255,255,255,.015); display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.h-dl-title { font: 700 28px/1.1 var(--display); color: var(--ink); margin: 2px 0 6px; }
+.h-dl-desc { font-size: 14px; color: var(--dim); }
+.h-hero-dl .btn-dl { align-self: flex-start; }
+
+.h-k { font: 600 11px/1.2 var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.h-v { font: 700 24px/1.1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.h-note { font-size: 14px; color: var(--dim); line-height: 1.55; margin-bottom: 14px; }
+.h-note strong { color: var(--text); font-weight: 600; }
+
+.h-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+.h-card { border: 1px solid var(--border); background: var(--panel); border-radius: var(--radius); padding: 24px; min-width: 0; }
+.h-span2 { grid-column: span 2; }
+.h-card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.h-card-head h2 { font: 700 21px/1.15 var(--display); color: var(--ink); }
+.h-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.h-fact { padding: 16px 18px; border-radius: var(--radius-sm); background: var(--ghost); border: 1px solid var(--border); min-width: 0; }
+.h-key { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; }
+#hwid-section .hwid-dots { margin-top: 4px; }
+
+.h-section-head { display: flex; align-items: center; gap: 12px; margin: 30px 0 14px; }
+.h-section-head h2 { font: 700 28px/1 var(--display); color: var(--ink); }
+.h-shortcuts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.h-shortcut { text-align: left; cursor: pointer; border: 1px solid var(--border); background: var(--panel); border-radius: var(--radius); padding: 18px 20px; color: inherit; font: inherit; transition: border-color .2s, transform .2s; }
+.h-shortcut:hover { border-color: rgba(255,77,166,.45); transform: translateY(-2px); }
+.h-shortcut .h-v { font-size: 30px; }
+.h-s { font-size: 13px; color: var(--dim); margin-top: 6px; }
+.h-form { display: grid; gap: 12px; }
+.h-form .mini-btn { justify-self: start; padding: 10px 18px; }
+#team-section .h-grid { align-items: start; }
+
+.h-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+.h-link { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); text-decoration: none; color: inherit; transition: border-color .2s; min-width: 0; }
+.h-link:hover { border-color: var(--border-bright); }
+.h-link .card-icon { margin: 0; flex-shrink: 0; }
+.h-link-title { display: block; font-weight: 600; color: var(--ink); }
+.h-link-sub { display: block; font-size: 13px; color: var(--dim); }
+.h-icon-discord { background: rgba(88,101,242,.16) !important; color: #8B95FF !important; }
+.row .meta a { color: var(--accent-light); text-decoration: none; }
+.row .meta a:hover { text-decoration: underline; }
+.h-icon-billing { background: rgba(255,77,166,.12) !important; }
+
+@media (max-width: 1100px) {
+  .h-hero { grid-template-columns: 1fr; }
+  .h-hero-dl { border-left: none; border-top: 1px solid var(--border); }
+  .h-grid { grid-template-columns: 1fr 1fr; }
+  .h-span2 { grid-column: 1 / -1; }
+}
+@media (max-width: 700px) {
+  .h-grid, .h-links, .h-facts { grid-template-columns: 1fr; }
+  .h-span2 { grid-column: auto; }
+  .h-hero-main, .h-hero-dl { padding: 24px 20px; }
+}
 </style>
 </head>
 <body>
@@ -956,7 +1024,7 @@ footer {
         <img class="nav-avatar" id="nav-avatar" src="" alt="">
         <div class="sidebar-user-info">
           <span class="nav-username" id="nav-username"></span>
-          <span class="sidebar-user-tag">Member</span>
+          <span class="sidebar-user-tag" id="sidebar-role">Member</span>
         </div>
       </div>
 
@@ -980,6 +1048,10 @@ footer {
         <button class="menu-item" data-tab="media" id="menu-media" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 10l4.5-2.6a.5.5 0 0 1 .75.43v8.34a.5.5 0 0 1-.75.43L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
           Media
+        </button>
+        <button class="menu-item" data-tab="mediamgr" id="menu-mediamgr" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-6 6.5-6s5.9 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.5c1.7.9 2.8 2.9 3 5.5"/></svg>
+          Media Manage
         </button>
         <button class="menu-item" data-tab="codes" id="menu-codes" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
@@ -1014,99 +1086,26 @@ footer {
 
     <!-- TAB: DASHBOARD -->
     <div class="tab-panel" id="tab-dashboard">
-      <div class="dash-header">
-        <div class="dash-eyebrow">Welcome back</div>
-        <h1 class="dash-title">Hey, <em id="dash-name">Player</em></h1>
-      </div>
 
-      <div class="license-panel">
-      <div class="status-row">
-        <div class="stat-cell">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6z"/></svg></div>
-          <div class="stat-label">License Status</div>
-          <div id="dash-status-pill" class="status-pill none">
-            <span class="pill-dot"></span>
-            <span id="dash-status-text">No License</span>
+      <section class="h-hero">
+        <div class="h-hero-main">
+          <div class="h-hero-eyebrow">Welcome back <span class="h-role" id="dash-role">Member</span></div>
+          <h1 class="h-hero-title">Hey, <em id="dash-name">Player</em></h1>
+          <div class="h-hero-status">
+            <div id="dash-status-pill" class="status-pill none"><span class="pill-dot"></span><span id="dash-status-text">No License</span></div>
+            <span class="h-chip" id="dash-plan" style="display:none">—</span>
           </div>
         </div>
-        <div class="stat-cell">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-          <div class="stat-label">Plan</div>
-          <div class="stat-val" id="dash-plan">—</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
-          <div class="stat-label">Expires</div>
-          <div class="stat-val" id="dash-expires">—</div>
-          <div class="bar-wrap" id="dash-bar-wrap" style="display:none">
-            <div class="bar-track"><div class="bar-fill" id="dash-bar-fill" style="width:0%"></div></div>
-            <div class="bar-sub" id="dash-bar-sub"></div>
-          </div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
-          <div class="stat-label">Member Since</div>
-          <div class="stat-val" id="dash-since">—</div>
-        </div>
-      </div>
-
-      <div class="key-row" id="key-row" style="display:none">
-        <div class="key-inner">
-          <div class="key-label-sm">License Key</div>
-          <div class="key-val" id="dash-key">•••••-••••-••••-••••-••••</div>
-        </div>
-        <div class="key-btns">
-          <button class="key-btn" id="btn-reveal">Reveal</button>
-          <button class="key-btn" id="btn-copy">Copy</button>
-        </div>
-      </div>
-      </div>
-
-      <div class="dl-hero" id="dl-hero">
-        <div class="dl-hero-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </div>
-        <span class="card-tag">Latest Build</span>
-        <div class="dl-hero-title">Download Zynth</div>
-        <div class="dl-hero-desc" id="dl-desc">Activate a license below to unlock your download.</div>
-        <a class="btn-dl locked" id="btn-download">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download .jar
-        </a>
-      </div>
-
-      <div class="cards">
-        <div class="card accent-discord">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <span class="card-tag">Support</span>
-          <div class="card-title">Discord Server</div>
-          <div class="card-desc">Open a ticket and get help from our team in under 24 hours.</div>
-          <a class="card-cta" href="https://discord.com/invite/Xa6BaUTgVs" target="_blank">
-            Join Server
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <div class="h-hero-dl" id="dl-hero">
+          <div class="h-k">Latest build</div>
+          <div class="h-dl-title">Zynth Client</div>
+          <div class="h-dl-desc" id="dl-desc">Activate a license below to unlock your download.</div>
+          <a class="btn-dl locked" id="btn-download">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .jar
           </a>
         </div>
-        <div class="card accent-docs">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <span class="card-tag">Reference</span>
-          <div class="card-title">Documentation</div>
-          <div class="card-desc">Setup guide, module list, keybind reference, and FAQ.</div>
-          <a class="card-cta" href="#" target="_blank">Read Docs <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-        <div class="card accent-billing">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          </div>
-          <span class="card-tag">Billing</span>
-          <div class="card-title">Buy or Renew</div>
-          <div class="card-desc">Get Monthly or Lifetime with card or crypto. Your key activates instantly.</div>
-          <a class="card-cta" href="checkout.html">Go to Checkout <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-        </div>
-      </div>
+      </section>
 
       <div class="redeem-section" id="redeem-section">
         <div class="redeem-section-header">
@@ -1117,38 +1116,90 @@ footer {
           <a class="btn-ghost" href="checkout.html" style="white-space:nowrap;flex-shrink:0">Buy a Key →</a>
         </div>
         <div class="redeem-inner">
-          <input class="redeem-input" id="key-input" type="text" placeholder="BLZMN-XXXX-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
+          <input class="redeem-input" id="key-input" type="text" placeholder="ZYNMN-XXXX-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
           <button class="btn-redeem" id="btn-redeem">Activate</button>
         </div>
         <div class="redeem-msg" id="redeem-msg"></div>
       </div>
 
-      <!-- HWID RESET SECTION -->
-      <div class="hwid-section" id="hwid-section">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:20px;">
-          <div>
-            <div class="hwid-section-title">HWID Reset</div>
-            <div class="hwid-section-sub">Locked to a new PC? Reset your hardware ID below.<br>You get <strong>2 resets per calendar month</strong>. Resets refresh on the 1st.</div>
+      <div class="h-grid">
+        <section class="h-card h-span2" id="license-card" style="display:none">
+          <div class="h-card-head"><h2>Your license</h2></div>
+          <div class="h-facts">
+            <div class="h-fact">
+              <div class="h-k">Expires</div>
+              <div class="h-v" id="dash-expires">—</div>
+              <div class="bar-wrap" id="dash-bar-wrap" style="display:none">
+                <div class="bar-track"><div class="bar-fill" id="dash-bar-fill" style="width:0%"></div></div>
+                <div class="bar-sub" id="dash-bar-sub"></div>
+              </div>
+            </div>
+            <div class="h-fact">
+              <div class="h-k">Member since</div>
+              <div class="h-v" id="dash-since">—</div>
+            </div>
           </div>
-        </div>
-        <div class="hwid-dots">
-          <div class="hwid-dot" id="hwid-dot-1"></div>
-          <div class="hwid-dot" id="hwid-dot-2"></div>
-        </div>
-        <div class="hwid-info" id="hwid-info">Loading reset info...</div>
-        <button class="btn-hwid-reset" id="btn-hwid-reset" disabled>Reset HWID</button>
-        <div class="hwid-msg" id="hwid-msg"></div>
+          <div class="key-row h-key" id="key-row" style="display:none">
+            <div class="key-inner">
+              <div class="key-label-sm">License key</div>
+              <div class="key-val" id="dash-key">•••••-••••-••••-••••-••••</div>
+            </div>
+            <div class="key-btns">
+              <button class="key-btn" id="btn-reveal">Reveal</button>
+              <button class="key-btn" id="btn-copy">Copy</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="h-card" id="hwid-section" style="display:none">
+          <div class="h-card-head"><h2>HWID</h2></div>
+          <div class="h-note" id="hwid-sub">Moving to a new PC? Reset here, then just start Zynth there. <strong>2 resets per month</strong>, refreshed on the 1st.</div>
+          <div class="hwid-dots" id="hwid-dots">
+            <div class="hwid-dot" id="hwid-dot-1"></div>
+            <div class="hwid-dot" id="hwid-dot-2"></div>
+          </div>
+          <div class="hwid-info" id="hwid-info">Loading reset info…</div>
+          <button class="btn-hwid-reset" id="btn-hwid-reset" disabled>Reset HWID</button>
+          <div class="hwid-msg" id="hwid-msg"></div>
+        </section>
       </div>
 
-      <!-- DEV-ONLY: STAFF ACTIVITY LOG -->
-      <div class="hwid-section" id="staff-log-section" style="display:none">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:20px;">
-          <div>
-            <div class="hwid-section-title">👑 Staff Activity Log <span class="access-badge dev" style="margin-left:6px;">Dev Only</span></div>
-            <div class="hwid-section-sub">Every license revoke + ban "Execute" action, newest first. Use this to check whether a Staff member is abusing the power.</div>
-          </div>
+      <!-- TEAM (staff / dev / finance) -->
+      <section id="team-section" style="display:none">
+        <div class="h-section-head"><h2>Team</h2><span id="team-badge"></span></div>
+        <div class="h-shortcuts" id="team-shortcuts"></div>
+        <div class="h-grid">
+          <section class="h-card" id="staff-reset-card" style="display:none">
+            <div class="h-card-head"><h2>Reset a user's HWID</h2></div>
+            <div class="h-note">For tickets. Does not use the user's own monthly resets.</div>
+            <form id="staff-reset-form" class="h-form" autocomplete="off">
+              <div class="f"><label for="sr-id">Discord ID</label><input id="sr-id" inputmode="numeric" placeholder="123456789012345678" required></div>
+              <div class="f"><label for="sr-reason">Reason</label><input id="sr-reason" maxlength="300" placeholder="Ticket #123, new PC" required></div>
+              <button class="mini-btn primary" type="submit" id="sr-submit">Reset HWID</button>
+              <div class="msg" id="sr-msg" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="h-card h-span2" id="staff-log-section" style="display:none">
+            <div class="h-card-head"><h2>Staff activity</h2><span class="access-badge dev">Dev only</span></div>
+            <div class="h-note">Every license revoke and ban ("Execute"), newest first.</div>
+            <div class="review-list" id="staff-log-list"></div>
+          </section>
         </div>
-        <div class="review-list" id="staff-log-list"></div>
+      </section>
+
+      <div class="h-links">
+        <a class="h-link" href="https://discord.com/invite/Xa6BaUTgVs" target="_blank" rel="noopener">
+          <span class="card-icon h-icon-discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <span><span class="h-link-title">Discord &amp; support</span><span class="h-link-sub">Open a ticket, we answer within 24 h</span></span>
+        </a>
+        <a class="h-link" href="#" target="_blank" rel="noopener">
+          <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+          <span><span class="h-link-title">Documentation</span><span class="h-link-sub">Setup, modules, keybinds, FAQ</span></span>
+        </a>
+        <a class="h-link" href="checkout.html">
+          <span class="card-icon h-icon-billing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+          <span><span class="h-link-title">Buy or renew</span><span class="h-link-sub">Monthly or Lifetime, card or crypto</span></span>
+        </a>
       </div>
     </div>
     <!-- /TAB: DASHBOARD -->
@@ -1312,6 +1363,34 @@ footer {
     </div>
     <!-- /TAB: MEDIA -->
 
+    <!-- TAB: MEDIA MANAGE (Dev) -->
+    <div class="tab-panel" id="tab-mediamgr" style="display:none">
+      <div class="dash-header">
+        <div class="dash-eyebrow">Dev only</div>
+        <h1 class="dash-title">Media <em>manage</em></h1>
+      </div>
+
+      <div class="tiles" id="mm-overview"></div>
+
+      <div class="panel-box">
+        <div class="panel-head"><div><h3>Media applications</h3><div class="sub">Approving creates the partner, their media license and their creator code. The applicant gets a Discord DM either way.</div></div></div>
+        <div class="toolbar">
+          <select id="apps-status" aria-label="Status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option><option value="all">All</option></select>
+        </div>
+        <div class="rows" id="apps-list"><div class="loading-note">Loading…</div></div>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-head"><div><h3>Media partners</h3><div class="sub">Revoking ends the partnership: their media license and creator codes stop working. Earnings stay on record.</div></div></div>
+        <div class="toolbar">
+          <input id="mm-search" type="search" placeholder="Search name or Discord ID" aria-label="Search partners">
+          <select id="mm-filter" aria-label="Status"><option value="active">Active</option><option value="revoked">Revoked</option><option value="all">All</option></select>
+        </div>
+        <div class="rows" id="mm-partners"><div class="loading-note">Loading…</div></div>
+      </div>
+    </div>
+    <!-- /TAB: MEDIA MANAGE -->
+
     <!-- TAB: CODES (Dev) -->
     <div class="tab-panel" id="tab-codes" style="display:none">
       <div class="dash-header">
@@ -1321,13 +1400,6 @@ footer {
 
       <div class="tiles" id="codes-overview"></div>
 
-      <div class="panel-box">
-        <div class="panel-head"><div><h3>Media applications</h3><div class="sub">Approving creates the partner, their media license and their creator code. The applicant gets a Discord DM either way.</div></div></div>
-        <div class="toolbar">
-          <select id="apps-status" aria-label="Status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option><option value="all">All</option></select>
-        </div>
-        <div class="rows" id="apps-list"><div class="loading-note">Loading…</div></div>
-      </div>
 
       <div class="panel-box">
         <h3>Create a code</h3>
@@ -1471,7 +1543,7 @@ function showLogin()     { document.getElementById('screen-login').style.display
 function showDashboard() { document.getElementById('screen-login').style.display = 'none'; document.getElementById('screen-dashboard').style.display = 'block'; }
 
 // ── SIDEBAR / TABS ────────────────────────────────────────────
-const TABS = ['dashboard', 'reviews', 'clips', 'peeks', 'media', 'codes', 'payouts'];
+const TABS = ['dashboard', 'reviews', 'clips', 'peeks', 'media', 'mediamgr', 'codes', 'payouts'];
 
 function switchTab(tab) {
   TABS.forEach(t => {
@@ -1584,6 +1656,8 @@ function applyLicense(lic, user) {
 
   const planLabels = { lifetime: '🌟 Lifetime', monthly: '📅 Monthly', dev: '👑 Dev', staff: '🛠️ Staff' };
   document.getElementById('dash-plan').textContent = planLabels[lic.plan] || lic.plan;
+  document.getElementById('dash-plan').style.display = '';
+  document.getElementById('license-card').style.display = '';
 
   let expiresText = 'Never';
   if (!['lifetime','dev','staff'].includes(lic.plan) && lic.expires_at) {
@@ -2016,8 +2090,10 @@ async function loadHWIDStatus(user, lic) {
       return;
     }
 
+    document.getElementById('hwid-dots').style.display = data.unlimited ? 'none' : '';
     if (data.unlimited) {
-      infoEl.textContent = `Dev: unlimited resets · ${used} used this month`;
+      document.getElementById('hwid-sub').innerHTML = 'Moving to a new PC? Reset here, then just start Zynth there. <strong>Devs have unlimited resets.</strong>';
+      infoEl.textContent = `${used} reset${used !== 1 ? 's' : ''} used this month`;
       btn.disabled = false;
     } else if (left <= 0) {
       infoEl.textContent = `Both resets used this month. Resets on the 1st.`;
@@ -2621,25 +2697,91 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   const payoutName = m => PAYOUT[m] || m;
 
   // ── Tab visibility ──────────────────────────────────────────
+  // The dashboard fires many requests at once on load; a busy Discord can make one fail, so retry.
+  async function apiRetry(path, tries = 3) {
+    for (let i = 1; ; i++) {
+      try { return await api(path); }
+      catch (e) { if (i >= tries) throw e; await new Promise(r => setTimeout(r, 700 * i)); }
+    }
+  }
+
+  const ROLES = [
+    ['is_dev', 'dev', 'Dev'], ['is_staff', 'staff', 'Staff'], ['is_finance', 'finance', 'Finance'], ['is_media', 'media', 'Media partner'],
+  ];
+
   window.setupRoleTabs = async function (user) {
     let access = {};
-    try { access = await api(`/access/${user.id}`); } catch { return; }
+    try { access = await apiRetry(`/access/${user.id}`); } catch { return; }
     $('menu-media').style.display = 'flex';
+    $('menu-mediamgr').style.display = access.is_dev ? 'flex' : 'none';
     $('menu-codes').style.display = access.is_dev ? 'flex' : 'none';
     $('menu-payouts').style.display = access.is_finance ? 'flex' : 'none';
+
+    const role = ROLES.find(([k]) => access[k]);
+    $('dash-role').textContent = role ? role[2] : 'Member';
+    $('dash-role').className = 'h-role ' + (role ? role[1] : '');
+    $('sidebar-role').textContent = role ? role[2] : 'Member';
+    setupTeam(access);
   };
   document.getElementById('btn-logout').addEventListener('click', () => {
-    ['menu-media', 'menu-codes', 'menu-payouts'].forEach(id => { $(id).style.display = 'none'; });
+    ['menu-media', 'menu-mediamgr', 'menu-codes', 'menu-payouts'].forEach(id => { $(id).style.display = 'none'; });
+    $('team-section').style.display = 'none';
     Object.keys(loaded).forEach(k => delete loaded[k]);
   });
-  document.querySelectorAll('.menu-item[data-tab="media"], .menu-item[data-tab="codes"], .menu-item[data-tab="payouts"]').forEach(btn => {
+  document.querySelectorAll('.menu-item[data-tab="media"], .menu-item[data-tab="mediamgr"], .menu-item[data-tab="codes"], .menu-item[data-tab="payouts"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
       if (loaded[tab]) return;
       loaded[tab] = true;
-      ({ media: loadMedia, codes: loadCodes, payouts: loadPayouts })[tab]();
+      ({ media: loadMedia, mediamgr: loadMediaManager, codes: loadCodes, payouts: loadPayouts })[tab]();
     });
   });
+  const openTab = tab => document.querySelector(`.menu-item[data-tab="${tab}"]`).click();
+
+  // ── Team section on the main page ───────────────────────────
+  function setupTeam(access) {
+    if (!access.is_staff && !access.is_finance) { $('team-section').style.display = 'none'; return; }
+    $('team-section').style.display = 'block';
+    $('team-badge').innerHTML = access.is_dev ? '<span class="access-badge dev">👑 Dev</span>'
+      : access.is_staff ? '<span class="access-badge staff">🛠️ Staff</span>' : '';
+
+    const cards = [];
+    if (access.is_dev) {
+      cards.push({ tab: 'mediamgr', k: 'Media applications', id: 'ts-apps', s: 'waiting for review' });
+      cards.push({ tab: 'codes', k: 'Discount codes', id: 'ts-codes', s: 'active codes' });
+      cards.push({ tab: 'peeks', k: 'Sneak peeks', id: null, v: '→', s: 'post a new preview' });
+    }
+    if (access.is_finance) cards.push({ tab: 'payouts', k: 'Withdrawals', id: 'ts-wd', s: 'open requests' });
+    $('team-shortcuts').innerHTML = cards.map(c => `
+      <button class="h-shortcut" data-open="${c.tab}">
+        <div class="h-k">${esc(c.k)}</div>
+        <div class="h-v"${c.id ? ` id="${c.id}"` : ''}>${c.v || '…'}</div>
+        <div class="h-s">${esc(c.s)}</div>
+      </button>`).join('');
+    $('team-shortcuts').querySelectorAll('[data-open]').forEach(b => b.onclick = () => openTab(b.dataset.open));
+    const fill = (id, p) => p.then(n => { if ($(id)) $(id).textContent = n; }).catch(() => { if ($(id)) $(id).textContent = '—'; });
+    if (access.is_dev) {
+      fill('ts-apps', apiRetry('/admin/media/applications?status=pending').then(r => r.applications.length));
+      fill('ts-codes', apiRetry('/admin/codes/overview').then(o => o.active_codes));
+    }
+    if (access.is_finance) fill('ts-wd', apiRetry('/admin/withdrawals?status=open').then(r => r.withdrawals.length));
+
+    $('staff-reset-card').style.display = access.is_staff ? 'block' : 'none';
+    $('staff-reset-form').onsubmit = async e => {
+      e.preventDefault();
+      const id = $('sr-id').value.trim(), reason = $('sr-reason').value.trim(), msg = $('sr-msg'), btn = $('sr-submit');
+      if (!/^\d{15,25}$/.test(id)) { msg.className = 'msg err'; msg.textContent = 'That is not a Discord ID.'; return; }
+      if (reason.length < 3) { msg.className = 'msg err'; msg.textContent = 'Give a reason (at least 3 characters).'; return; }
+      if (!confirm(`Reset the HWID of ${id}? Their current PC stops working until they start Zynth on the new one.`)) return;
+      btn.disabled = true; msg.className = 'msg'; msg.textContent = '';
+      try {
+        await api(`/admin/licenses/${id}/hwid-reset`, { method: 'POST', body: JSON.stringify({ reason }) });
+        msg.className = 'msg ok'; msg.textContent = '✓ HWID reset. They can start Zynth on their new PC now.';
+        $('staff-reset-form').reset();
+      } catch (err) { msg.className = 'msg err'; msg.textContent = '✗ ' + err.message; }
+      btn.disabled = false;
+    };
+  }
 
   // ── Bar chart (single series, one axis, hover + table view) ─
   function barChart(el, points, { title, sub, money = false }) {
@@ -2882,8 +3024,6 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     setupCodeForm();
     loadCodeOverview();
     loadCodeList();
-    loadApplications();
-    $('apps-status').onchange = loadApplications;
     let t;
     $('codes-search').oninput = () => { clearTimeout(t); t = setTimeout(loadCodeList, 250); };
     $('codes-type').onchange = loadCodeList;
@@ -2999,7 +3139,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       list.innerHTML = applications.map(a => `
         <div class="row" data-app-id="${a.id}">
           <div class="main">
-            <div class="title">#${a.id} ${esc(a.applicant_username || '')} <span style="font-family:var(--mono)">(${esc(a.applicant_discord_id)})</span> ${badge(a.status)}</div>
+            <div class="title">#${a.id} ${esc(a.applicant_username || '')} <span style="font-family:var(--mono);font-weight:400;color:var(--dim)">${esc(a.applicant_discord_id)}</span> ${badge(a.status)}</div>
             <div class="meta">${esc(a.platform)} · ${/^https?:\/\//i.test(a.channel_url || '') ? `<a href="${esc(a.channel_url)}" target="_blank" rel="noopener noreferrer">${esc(a.channel_url)}</a>` : esc(a.channel_url)}
               ${a.audience_size != null ? ` · ${esc(a.audience_size)} followers` : ''}${a.desired_code ? ` · wants <b>${esc(a.desired_code)}</b>` : ''}
               · ${payoutName(a.payout_method)} · applied ${fmtDate(a.created_at)}
@@ -3031,7 +3171,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         try {
           const r = await api(`/admin/media/applications/${btn.dataset.appApprove}/approve`, { method: 'POST', body: JSON.stringify({ code: code.trim() || null }) });
           toast(r.note || 'Application approved.', r.note ? 'red' : 'green');
-          loadApplications(); loadCodeOverview(); loadCodeList();
+          loadApplications(); loadPartners();
         } catch (err) { toast(err.message, 'red'); btn.disabled = false; }
       });
       list.querySelectorAll('[data-app-reject]').forEach(btn => btn.onclick = async () => {
@@ -3042,10 +3182,84 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         try {
           await api(`/admin/media/applications/${btn.dataset.appReject}/reject`, { method: 'POST', body: JSON.stringify({ reason: reason.trim() }) });
           toast('Application rejected.', 'green');
-          loadApplications();
+          loadApplications(); loadOverview();
         } catch (err) { toast(err.message, 'red'); btn.disabled = false; }
       });
     } catch (e) { list.innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
+  }
+
+  // ── MEDIA MANAGE (Dev) ──────────────────────────────────────
+  let partnersCache = [];
+  function loadMediaManager() {
+    $('apps-status').onchange = loadApplications;
+    $('mm-filter').onchange = renderPartners;
+    let t;
+    $('mm-search').oninput = () => { clearTimeout(t); t = setTimeout(renderPartners, 200); };
+    loadApplications();
+    loadPartners();
+  }
+
+  async function loadOverview() {
+    let pending = '—';
+    try { pending = (await api('/admin/media/applications?status=pending')).applications.length; } catch { /* shown as — */ }
+    const active = partnersCache.filter(p => p.status === 'active');
+    const sum = k => partnersCache.reduce((n, p) => n + ((p.balance && p.balance[k]) || 0), 0);
+    $('mm-overview').innerHTML = `
+      <div class="tile${pending ? ' hl' : ''}"><div class="k">Pending applications</div><div class="v">${pending}</div><div class="s">waiting for a Dev</div></div>
+      <div class="tile"><div class="k">Active partners</div><div class="v">${active.length}</div><div class="s">${partnersCache.length - active.length} revoked</div></div>
+      <div class="tile"><div class="k">Earned by partners</div><div class="v">${eur(sum('earned_cents'))}</div><div class="s">${partnersCache.reduce((n, p) => n + ((p.balance && p.balance.sales) || 0), 0)} paid orders</div></div>
+      <div class="tile"><div class="k">Available to withdraw</div><div class="v">${eur(sum('available_cents'))}</div><div class="s">${eur(sum('pending_cents'))} still on hold</div></div>`;
+  }
+
+  async function loadPartners() {
+    try {
+      partnersCache = (await api('/admin/media/partners')).partners;
+      renderPartners();
+    } catch (e) { $('mm-partners').innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
+    loadOverview();
+  }
+
+  function renderPartners() {
+    const list = $('mm-partners');
+    const f = $('mm-filter').value, q = $('mm-search').value.trim().toLowerCase();
+    const rows = partnersCache.filter(p => (f === 'all' || p.status === f)
+      && (!q || (p.username || '').toLowerCase().includes(q) || p.discord_id.includes(q)));
+    if (!rows.length) { list.innerHTML = '<div class="empty-note">No partners here.</div>'; return; }
+    list.innerHTML = rows.map(p => {
+      const b = p.balance || {};
+      return `
+        <div class="row">
+          <div class="main">
+            <div class="title">${esc(p.username || 'Unknown')} <span style="font-family:var(--mono);font-weight:400;color:var(--dim)">${esc(p.discord_id)}</span> ${badge(p.status)}</div>
+            <div class="meta">${b.sales || 0} sales · earned ${eur(b.earned_cents)} · ${eur(b.pending_cents)} on hold
+              · ${p.payout_method ? payoutName(p.payout_method) : 'no payout method'} · partner since ${fmtDate(p.approved_at)}
+              ${p.status === 'revoked' ? ` · revoked ${fmtDate(p.revoked_at)}${p.revoke_reason ? `: ${esc(p.revoke_reason)}` : ''}` : ''}</div>
+          </div>
+          <div class="right">
+            <div class="amount">${eur(b.available_cents)}</div>
+            <div class="actions">
+              <button class="mini-btn" data-codes="${esc(p.discord_id)}">Codes</button>
+              ${p.status === 'active' ? `<button class="mini-btn danger" data-revoke="${esc(p.discord_id)}" data-name="${esc(p.username || p.discord_id)}">Revoke</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    list.querySelectorAll('[data-codes]').forEach(btn => btn.onclick = () => {
+      $('codes-search').value = btn.dataset.codes;
+      openTab('codes');
+      $('codes-search').dispatchEvent(new Event('input'));
+    });
+    list.querySelectorAll('[data-revoke]').forEach(btn => btn.onclick = async () => {
+      const reason = prompt(`Revoke ${btn.dataset.name} as a media partner? Their media license and creator codes stop working.\n\nReason (they see this):`);
+      if (reason === null) return;
+      if (reason.trim().length < 3) { toast('The reason needs at least 3 characters.', 'red'); return; }
+      btn.disabled = true;
+      try {
+        await api(`/admin/media/partners/${btn.dataset.revoke}/revoke`, { method: 'POST', body: JSON.stringify({ reason: reason.trim() }) });
+        toast('Partner revoked.', 'green');
+        loadPartners();
+      } catch (err) { toast(err.message, 'red'); btn.disabled = false; }
+    });
   }
 
   // ── PAYOUTS ─────────────────────────────────────────────────
