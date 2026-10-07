@@ -889,6 +889,32 @@ footer {
   .h-span2 { grid-column: auto; }
   .h-hero-main, .h-hero-dl { padding: 24px 20px; }
 }
+
+/* ── Dialogs ──────────────────────────────────────────────────── */
+.zd-backdrop { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(4,3,6,.66); backdrop-filter: blur(6px); opacity: 0; transition: opacity .16s; }
+.zd-backdrop.open { opacity: 1; }
+.zd-box { width: 100%; max-width: 460px; background: var(--panel); border: 1px solid var(--border-bright); border-radius: 18px; padding: 24px;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(255,77,166,.08); transform: translateY(10px) scale(.98); transition: transform .16s; }
+.zd-backdrop.open .zd-box { transform: none; }
+.zd-box.danger { border-color: rgba(248,113,113,.35); }
+.zd-title { font: 700 22px/1.15 var(--display); color: var(--ink); margin-bottom: 8px; }
+.zd-text { font-size: 14.5px; color: var(--dim); line-height: 1.55; margin-bottom: 16px; overflow-wrap: anywhere; }
+.zd-label { display: block; font-size: 13.5px; color: var(--dim); font-weight: 500; margin-bottom: 6px; }
+.zd-input { width: 100%; background: var(--bg-2); border: 1px solid var(--border-bright); color: var(--ink); border-radius: var(--radius-sm);
+  padding: 11px 12px; font: 400 15px var(--font); outline: none; resize: vertical; }
+.zd-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,77,166,.15); }
+.zd-foot { display: flex; justify-content: space-between; gap: 12px; min-height: 18px; margin: 6px 0 4px; font-size: 12.5px; }
+.zd-err { color: var(--red); }
+.zd-count { color: var(--dim2); font-variant-numeric: tabular-nums; margin-left: auto; }
+.zd-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.zd-btn { border-radius: 999px; padding: 11px 20px; font: 600 14px/1 var(--font); cursor: pointer; border: 1px solid var(--border-bright); background: transparent; color: var(--text); transition: background .15s, border-color .15s, color .15s; }
+.zd-btn.ghost:hover { border-color: var(--border-bright); background: var(--ghost-strong); color: #fff; }
+.zd-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.zd-btn.primary:hover { background: var(--accent-light); border-color: var(--accent-light); }
+.zd-btn.danger { background: rgba(248,113,113,.14); border-color: rgba(248,113,113,.5); color: var(--red); }
+.zd-btn.danger:hover { background: rgba(248,113,113,.24); color: #fff; }
+@media (max-width: 480px) { .zd-actions .zd-btn { flex: 1; } }
 </style>
 </head>
 <body>
@@ -1538,6 +1564,76 @@ function toast(msg, type='') {
   toastTimer = setTimeout(() => { t.className = ''; }, 3200);
 }
 
+// ── DIALOGS (instead of the browser's confirm and prompt popups) ──
+// zConfirm resolves true/false; zPrompt resolves the typed text, or null when cancelled.
+function zDialog({ title, text = '', input = null, confirmText = 'Confirm', cancelText = 'Cancel', danger = false }) {
+  return new Promise(resolve => {
+    const prevFocus = document.activeElement;
+    const wrap = document.createElement('div');
+    wrap.className = 'zd-backdrop';
+    const field = input
+      ? `<label class="zd-label" for="zd-input">${escapeHtml(input.label || '')}</label>
+         ${input.multiline
+           ? `<textarea id="zd-input" class="zd-input" rows="3" maxlength="${input.maxLength || 500}" placeholder="${escapeHtml(input.placeholder || '')}"></textarea>`
+           : `<input id="zd-input" class="zd-input" maxlength="${input.maxLength || 500}" placeholder="${escapeHtml(input.placeholder || '')}" autocomplete="off" spellcheck="false">`}
+         <div class="zd-foot"><span class="zd-err" aria-live="polite"></span><span class="zd-count"></span></div>`
+      : '';
+    wrap.innerHTML = `
+      <div class="zd-box${danger ? ' danger' : ''}" role="dialog" aria-modal="true" aria-labelledby="zd-title">
+        <h3 class="zd-title" id="zd-title">${escapeHtml(title)}</h3>
+        ${text ? `<div class="zd-text">${escapeHtml(text).replace(/\n/g, '<br>')}</div>` : ''}
+        ${field}
+        <div class="zd-actions">
+          <button type="button" class="zd-btn ghost" data-act="cancel">${escapeHtml(cancelText)}</button>
+          <button type="button" class="zd-btn ${danger ? 'danger' : 'primary'}" data-act="ok">${escapeHtml(confirmText)}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+    requestAnimationFrame(() => wrap.classList.add('open'));
+
+    const box = wrap.querySelector('.zd-box');
+    const inp = wrap.querySelector('#zd-input');
+    const err = wrap.querySelector('.zd-err');
+    const count = wrap.querySelector('.zd-count');
+    const max = input && (input.maxLength || 500);
+    const sync = () => { if (count) count.textContent = `${inp.value.length}/${max}`; if (err) err.textContent = ''; };
+    if (inp) { inp.value = input.value || ''; inp.addEventListener('input', sync); sync(); }
+
+    const close = result => {
+      document.removeEventListener('keydown', onKey, true);
+      wrap.classList.remove('open');
+      setTimeout(() => wrap.remove(), 160);
+      if (prevFocus && prevFocus.focus) prevFocus.focus();
+      resolve(result);
+    };
+    const ok = () => {
+      if (!inp) return close(true);
+      const v = inp.value.trim();
+      const min = input.minLength || 0;
+      if (v.length < min) { err.textContent = min > 1 ? `At least ${min} characters, please.` : 'This can\'t be empty.'; inp.focus(); return; }
+      close(v);
+    };
+    const cancel = () => close(inp ? null : false);
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+      else if (e.key === 'Enter' && !(inp && inp.tagName === 'TEXTAREA' && !e.ctrlKey && !e.metaKey)) { e.preventDefault(); ok(); }
+      else if (e.key === 'Tab') {                           // keep focus inside the dialog
+        const f = [...box.querySelectorAll('input, textarea, button')];
+        const i = f.indexOf(document.activeElement);
+        if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+      }
+    }
+    document.addEventListener('keydown', onKey, true);
+    wrap.addEventListener('mousedown', e => { if (e.target === wrap) cancel(); });
+    wrap.querySelector('[data-act="ok"]').onclick = ok;
+    wrap.querySelector('[data-act="cancel"]').onclick = cancel;
+    (inp || wrap.querySelector('[data-act="ok"]')).focus();
+  });
+}
+const zConfirm = o => zDialog(o);
+const zPrompt = o => zDialog({ ...o, input: o.input || {} });
+
 // ── SCREENS ───────────────────────────────────────────────────
 function showLogin()     { document.getElementById('screen-login').style.display = 'flex'; document.getElementById('screen-dashboard').style.display = 'none'; }
 function showDashboard() { document.getElementById('screen-login').style.display = 'none'; document.getElementById('screen-dashboard').style.display = 'block'; }
@@ -1730,12 +1826,17 @@ function applyLicense(lic, user) {
 
 // ── ACCESS (Staff / Dev) ─────────────────────────────────────
 async function fetchAccess(user, lic) {
-  try {
-    const res  = await fetch(`${API_URL}/access/${user.id}?key=${encodeURIComponent(lic.key)}`);
-    const data = await res.json();
-    CURRENT_ACCESS = { is_staff: !!data.is_staff, is_dev: !!data.is_dev };
-  } catch (e) {
-    CURRENT_ACCESS = { is_staff: false, is_dev: false };
+  // Retried, and a failure keeps the roles already known: a busy Discord must not hide Dev/Staff features.
+  for (let i = 1; i <= 3; i++) {
+    try {
+      const res  = await fetch(`${API_URL}/access/${user.id}?key=${encodeURIComponent(lic.key)}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      CURRENT_ACCESS = { is_staff: !!data.is_staff, is_dev: !!data.is_dev };
+      break;
+    } catch (e) {
+      if (i < 3) await new Promise(r => setTimeout(r, 700 * i));
+    }
   }
   const logSection = document.getElementById('staff-log-section');
   if (logSection) {
@@ -1798,7 +1899,8 @@ function avatarUrlFor(discord_id, avatar) {
 // ── DEV: REVOKE + BAN ────────────────────────────────────────
 async function revokeUser(targetDiscordId, btn) {
   if (!CURRENT_USER || !CURRENT_LIC) return;
-  if (!confirm(`Revoke this user's license and PERMANENTLY BAN them from the Discord server?\n\nDiscord ID: ${targetDiscordId}\n\nThis cannot be undone.`)) return;
+  if (!(await zConfirm({ title: 'Execute this user?', danger: true, confirmText: 'Revoke & ban',
+    text: `Their license is revoked and they are permanently banned from the Discord server.\n\nDiscord ID: ${targetDiscordId}\nThis cannot be undone.` }))) return;
 
   if (btn) { btn.disabled = true; btn.textContent = 'Executing…'; }
   try {
@@ -1840,7 +1942,7 @@ async function loadReviews() {
       : '';
     const res  = await fetch(`${API_URL}/reviews${qs}`);
     const data = await res.json();
-    CURRENT_ACCESS = { is_staff: !!data.is_staff, is_dev: !!data.is_dev };
+    // Roles come from /access only: this endpoint treats a failed login check as a guest.
     REVIEW_COOLDOWN_DAYS_LEFT = data.cooldown_days_left || 0;
     ALL_REVIEWS = data.reviews || [];
     renderReviews(ALL_REVIEWS);
@@ -1935,7 +2037,7 @@ window.startEditReview = startEditReview;
 
 async function deleteReview(id, btn) {
   if (!CURRENT_USER || !CURRENT_LIC) return;
-  if (!confirm('Delete this review? This cannot be undone.')) return;
+  if (!(await zConfirm({ title: 'Delete this review?', text: 'This cannot be undone.', confirmText: 'Delete', danger: true }))) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
   try {
     const res = await fetch(`${API_URL}/review/${id}?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`, { method: 'DELETE' });
@@ -1966,7 +2068,6 @@ async function loadClips() {
       : '';
     const res  = await fetch(`${API_URL}/clips${qs}`);
     const data = await res.json();
-    CURRENT_ACCESS = { is_staff: !!data.is_staff, is_dev: !!data.is_dev };
     ALL_CLIPS = data.clips || [];
     renderClips(ALL_CLIPS);
   } catch (e) {
@@ -2041,7 +2142,7 @@ window.startEditClip = startEditClip;
 
 async function deleteClip(id, btn) {
   if (!CURRENT_USER || !CURRENT_LIC) return;
-  if (!confirm('Delete this clip from the site? This cannot be undone. (The Discord post itself stays up.)')) return;
+  if (!(await zConfirm({ title: 'Delete this clip?', text: 'It is removed from the site. The Discord post itself stays up. This cannot be undone.', confirmText: 'Delete', danger: true }))) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
   try {
     const res = await fetch(`${API_URL}/clip/${id}?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`, { method: 'DELETE' });
@@ -2112,7 +2213,8 @@ function setupHWIDReset(user, lic) {
   const msg = document.getElementById('hwid-msg');
 
   btn.addEventListener('click', async () => {
-    if (!confirm('Reset your HWID? Your current installation stops working. Download Zynth again from this dashboard on the PC you want to use.')) return;
+    if (!(await zConfirm({ title: 'Reset your HWID?', confirmText: 'Reset HWID',
+      text: 'Zynth stops working on the PC it is bound to now. Then just start Zynth on the PC you want to use, no new download needed.' }))) return;
 
     btn.disabled    = true;
     btn.textContent = 'Resetting…';
@@ -2234,7 +2336,8 @@ async function confirmPendingReset() {
     if (!res.ok) { toast(data.error || 'Reset request not found.', 'red'); return; }
     const r = data.request;
     if (r.status !== 'pending') { toast('That HWID reset was already confirmed.'); return; }
-    if (!confirm(`Confirm HWID reset for Discord user ${r.target_discord_id}?\n\nReason: ${r.reason}\n\nTheir current installation stops working.`)) return;
+    if (!(await zConfirm({ title: 'Confirm HWID reset', confirmText: 'Reset HWID',
+      text: `Discord user ${r.target_discord_id}\nReason: ${r.reason}\n\nZynth stops working on their current PC until they start it on the new one.` }))) return;
     const done = await fetch(`${API_URL}/admin/hwid-reset-requests/${id}/confirm`, { method: 'POST' });
     const out = await done.json();
     if (done.ok) toast('HWID reset confirmed.', 'green');
@@ -2644,7 +2747,7 @@ async function loadPeeksAdmin() {
 
 async function deletePeek(id, btn) {
   if (!CURRENT_USER || !CURRENT_LIC) return;
-  if (!confirm('Delete this sneak peek from the website?')) return;
+  if (!(await zConfirm({ title: 'Delete this sneak peek?', text: 'It is removed from the website.', confirmText: 'Delete', danger: true }))) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
   try {
     const res = await fetch(`${API_URL}/peek/${id}?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`, { method: 'DELETE' });
@@ -2772,7 +2875,8 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       const id = $('sr-id').value.trim(), reason = $('sr-reason').value.trim(), msg = $('sr-msg'), btn = $('sr-submit');
       if (!/^\d{15,25}$/.test(id)) { msg.className = 'msg err'; msg.textContent = 'That is not a Discord ID.'; return; }
       if (reason.length < 3) { msg.className = 'msg err'; msg.textContent = 'Give a reason (at least 3 characters).'; return; }
-      if (!confirm(`Reset the HWID of ${id}? Their current PC stops working until they start Zynth on the new one.`)) return;
+      if (!(await zConfirm({ title: 'Reset this HWID?', confirmText: 'Reset HWID',
+        text: `Discord user ${id}\nReason: ${reason}\n\nZynth stops working on their current PC until they start it on the new one.` }))) return;
       btn.disabled = true; msg.className = 'msg'; msg.textContent = '';
       try {
         await api(`/admin/licenses/${id}/hwid-reset`, { method: 'POST', body: JSON.stringify({ reason }) });
@@ -2861,14 +2965,16 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         <div class="kv"><span>Payout</span><b>${esc(payoutName(pending.payout_method))} · ${esc(pending.payout_hint)}</b></div>
         <div class="form-actions"><button class="btn-imgup" id="app-cancel">Cancel application</button></div></div>`;
       $('app-cancel').onclick = async () => {
-        if (!confirm('Cancel your application?')) return;
+        if (!(await zConfirm({ title: 'Cancel your application?', text: 'You can apply again later.', confirmText: 'Cancel application', cancelText: 'Keep it', danger: true }))) return;
         try { await api(`/media/application/${pending.id}/cancel`, { method: 'POST' }); toast('Application cancelled.', 'green'); loadMedia(); }
         catch (e) { toast(e.message, 'red'); }
       };
       return;
     }
-    const note = last && last.status === 'rejected'
-      ? `<div class="empty-note" style="margin-bottom:14px">Your last application was rejected${last.rejection_reason ? `: <b>${esc(last.rejection_reason)}</b>` : '.'} You can apply again 7 days after the decision.</div>` : '';
+    const ended = app.ended && !(last && last.status === 'rejected' && last.reviewed_at > app.ended.revoked_at)
+      ? `<div class="empty-note" style="margin-bottom:14px">Your media partnership ended on ${fmtDate(app.ended.revoked_at)}${app.ended.reason ? `: <b>${esc(app.ended.reason)}</b>` : '.'} Your creator code no longer works. You can apply again below.</div>` : '';
+    const note = ended + (last && last.status === 'rejected'
+      ? `<div class="empty-note" style="margin-bottom:14px">Your last application was rejected${last.rejection_reason ? `: <b>${esc(last.rejection_reason)}</b>` : '.'} You can apply again 7 days after the decision.</div>` : '');
     if (!app.applications_open) {
       body.innerHTML = note + '<div class="empty-note">Media applications are not open yet. Check back soon.</div>';
       return;
@@ -3000,7 +3106,8 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         e.preventDefault();
         const msg = $('wd-msg'), btn = $('wd-submit');
         const cents = Math.round(parseFloat($('wd-amount').value) * 100);
-        if (!confirm(`Request a withdrawal of ${eur(cents)} to your ${payoutName(me.payout.method)} (${me.payout.hint})?`)) return;
+        if (!(await zConfirm({ title: `Withdraw ${eur(cents)}?`, confirmText: 'Request withdrawal',
+          text: `Paid out to your ${payoutName(me.payout.method)} (${me.payout.hint}) once a finance admin approves it.` }))) return;
         btn.disabled = true; msg.className = 'msg'; msg.textContent = '';
         try {
           await api('/media/withdrawals', { method: 'POST', body: JSON.stringify({ amount_cents: cents }) });
@@ -3012,7 +3119,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       };
     }
     document.querySelectorAll('[data-cancel]').forEach(btn => btn.onclick = async () => {
-      if (!confirm('Cancel this withdrawal? The money goes back to your available balance.')) return;
+      if (!(await zConfirm({ title: 'Cancel this withdrawal?', text: 'The money goes back to your available balance.', confirmText: 'Cancel withdrawal', cancelText: 'Keep it', danger: true }))) return;
       btn.disabled = true;
       try { await api(`/media/withdrawals/${btn.dataset.cancel}/cancel`, { method: 'POST' }); toast('Withdrawal cancelled.', 'green'); loadMedia(); }
       catch (err) { toast(err.message, 'red'); btn.disabled = false; }
@@ -3108,7 +3215,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
           </div></div>
         </div>`).join('');
       list.querySelectorAll('[data-toggle]').forEach(btn => btn.onclick = async () => {
-        if (btn.dataset.to === 'disabled' && !confirm('Disable this code? It stops working at checkout straight away.')) return;
+        if (btn.dataset.to === 'disabled' && !(await zConfirm({ title: 'Disable this code?', text: 'It stops working at checkout straight away.', confirmText: 'Disable', danger: true }))) return;
         btn.disabled = true;
         try { await api(`/admin/codes/${btn.dataset.toggle}`, { method: 'PATCH', body: JSON.stringify({ status: btn.dataset.to }) }); toast('Code updated.', 'green'); loadCodeList(); loadCodeOverview(); }
         catch (err) { toast(err.message, 'red'); btn.disabled = false; }
@@ -3165,7 +3272,9 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         } catch (err) { d.innerHTML = `<div class="empty-note">${esc(err.message)}</div>`; }
       });
       list.querySelectorAll('[data-app-approve]').forEach(btn => btn.onclick = async () => {
-        const code = prompt('Creator code for this partner (leave as is to use the one they asked for):', btn.dataset.code);
+        const code = await zPrompt({ title: 'Approve this application?', confirmText: 'Approve',
+          text: 'This creates the partner, their media license and their creator code. They get a Discord DM.',
+          input: { label: 'Creator code', value: btn.dataset.code, placeholder: 'Leave empty for no code', maxLength: 24 } });
         if (code === null) return;
         btn.disabled = true;
         try {
@@ -3175,9 +3284,10 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         } catch (err) { toast(err.message, 'red'); btn.disabled = false; }
       });
       list.querySelectorAll('[data-app-reject]').forEach(btn => btn.onclick = async () => {
-        const reason = prompt('Reason for rejecting (the applicant sees this):');
+        const reason = await zPrompt({ title: 'Reject this application?', confirmText: 'Reject', danger: true,
+          text: 'The applicant gets a Discord DM with your reason.',
+          input: { label: 'Reason', placeholder: 'e.g. Not enough Minecraft content yet', minLength: 3, maxLength: 500, multiline: true } });
         if (reason === null) return;
-        if (reason.trim().length < 3) { toast('The reason needs at least 3 characters.', 'red'); return; }
         btn.disabled = true;
         try {
           await api(`/admin/media/applications/${btn.dataset.appReject}/reject`, { method: 'POST', body: JSON.stringify({ reason: reason.trim() }) });
@@ -3187,6 +3297,86 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       });
     } catch (e) { list.innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
   }
+
+  // ── AUTO SYNC ───────────────────────────────────────────────
+  // Every 20 s, and whenever the page comes back into view, the open tab refreshes its data.
+  // A change to the license or roles (new key, revoked, expired, role added/removed) reloads
+  // the page so everything is rebuilt cleanly. Nothing refreshes while someone is busy: a
+  // dialog is open, they are typing (or typed in the last minute), or a detail row is open.
+  const SYNC_MS = 20000;
+  const lastInput = {};
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.addEventListener('input', e => {
+      lastInput[p.id] = Date.now();
+      const f = e.target.closest && e.target.closest('form');
+      if (f) f.dataset.dirty = '1';                      // unsaved form: never refreshed away
+    }, true);
+    p.addEventListener('reset', e => { delete e.target.dataset.dirty; }, true);
+  });
+  let lastSig = null, syncing = false, syncTimer;
+
+  function busy(panel) {
+    const a = document.activeElement;
+    return !!document.querySelector('.zd-backdrop')
+      || (panel.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))
+      || Date.now() - (lastInput[panel.id] || 0) < 60000
+      || !!panel.querySelector('.detail, form[data-dirty]');
+  }
+
+  async function sync() {
+    if (syncing || document.hidden || !CURRENT_USER || !localStorage.getItem('blizz_dc_token')) return;
+    syncing = true;
+    try {
+      const tab = TABS.find(t => document.getElementById('tab-' + t).style.display !== 'none') || 'dashboard';
+      const panel = document.getElementById('tab-' + tab);
+      let access = null;
+      try {
+        const [lic, acc] = await Promise.all([apiRetry(`/license/${CURRENT_USER.id}`), apiRetry(`/access/${CURRENT_USER.id}`)]);
+        access = acc;
+        CURRENT_ACCESS = { is_staff: !!acc.is_staff, is_dev: !!acc.is_dev };
+        const l = lic.has_license ? lic.license : null;
+        const sig = JSON.stringify([l && [l.key, l.plan, l.expired, l.expires_at], acc.is_dev, acc.is_staff, acc.is_finance, acc.is_media]);
+        if (lastSig !== null && sig !== lastSig) {
+          if (busy(panel)) return;                                // try again on the next round
+          location.reload();
+          return;
+        }
+        lastSig = sig;
+      } catch { /* offline or Discord busy: keep what is shown */ }
+      if (busy(panel)) return;
+
+      if (tab === 'dashboard') {
+        const hwidBtn = document.getElementById('btn-hwid-reset');
+        if (CURRENT_LIC && hwidBtn.textContent !== 'Resetting…') loadHWIDStatus(CURRENT_USER, CURRENT_LIC);
+        if (access) setupTeam(access);
+        if (CURRENT_ACCESS.is_dev) loadStaffActions();
+      }
+      else if (tab === 'reviews') loadReviews();
+      else if (tab === 'clips') loadClips();
+      else if (tab === 'peeks' && typeof loadPeeksAdmin === 'function') loadPeeksAdmin();
+      else if (tab === 'media' && loaded.media) loadMedia();
+      else if (tab === 'mediamgr' && loaded.mediamgr) { loadApplications(); loadPartners(); }
+      else if (tab === 'codes' && loaded.codes) { loadCodeOverview(); loadCodeList(); }
+      else if (tab === 'payouts' && loaded.payouts) loadWithdrawals();
+    } finally { syncing = false; }
+  }
+  const syncSoon = (ms = 1000) => { clearTimeout(syncTimer); syncTimer = setTimeout(sync, ms); };
+
+  setInterval(sync, SYNC_MS);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncSoon(100); });
+  window.addEventListener('focus', () => syncSoon(100));
+  // Own actions end in a green toast: sync the rest of the page right after. The action
+  // already updated what it touched, so a resulting license/role change is taken as known.
+  const plainToast = window.toast;
+  window.toast = (msg, type = '') => {
+    plainToast(msg, type);
+    if (type === 'green') {
+      lastSig = null;
+      document.querySelectorAll('form[data-dirty]').forEach(f => { delete f.dataset.dirty; });   // it was saved
+      syncSoon();
+    }
+  };
+  document.getElementById('btn-logout').addEventListener('click', () => { lastSig = null; });
 
   // ── MEDIA MANAGE (Dev) ──────────────────────────────────────
   let partnersCache = [];
@@ -3250,9 +3440,10 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       $('codes-search').dispatchEvent(new Event('input'));
     });
     list.querySelectorAll('[data-revoke]').forEach(btn => btn.onclick = async () => {
-      const reason = prompt(`Revoke ${btn.dataset.name} as a media partner? Their media license and creator codes stop working.\n\nReason (they see this):`);
+      const reason = await zPrompt({ title: `Revoke ${btn.dataset.name}?`, confirmText: 'Revoke partner', danger: true,
+        text: 'Their media license and creator codes stop working. Their earnings stay on record.',
+        input: { label: 'Reason (they see this)', placeholder: 'e.g. No uploads for 3 months', minLength: 3, maxLength: 500, multiline: true } });
       if (reason === null) return;
-      if (reason.trim().length < 3) { toast('The reason needs at least 3 characters.', 'red'); return; }
       btn.disabled = true;
       try {
         await api(`/admin/media/partners/${btn.dataset.revoke}/revoke`, { method: 'POST', body: JSON.stringify({ reason: reason.trim() }) });
@@ -3321,7 +3512,8 @@ document.getElementById('btn-logout').addEventListener('click', () => {
         const msg = d.querySelector('[data-f="msg"]');
         if (act === 'reject' && !reason) { msg.className = 'msg err'; msg.textContent = 'Add a reason first.'; return; }
         if (act === 'mark-paid' && !reference) { msg.className = 'msg err'; msg.textContent = 'Add the payment reference first.'; return; }
-        if (act === 'mark-paid' && !confirm(`Confirm you have sent ${eur(w.amount_cents)} to ${w.payout_details}?`)) return;
+        if (act === 'mark-paid' && !(await zConfirm({ title: 'Mark as paid?', confirmText: 'Mark as paid',
+          text: `Only confirm once you have sent ${eur(w.amount_cents)} to ${w.payout_details}.` }))) return;
         d.querySelectorAll('[data-act]').forEach(b => { b.disabled = true; });
         try {
           await api(`/admin/withdrawals/${id}/${act}`, { method: 'POST', body: JSON.stringify({ reason, reference }) });
@@ -3343,7 +3535,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     } catch (e) { $('st-msg').className = 'msg err'; $('st-msg').textContent = e.message; }
     $('settings-form').onsubmit = async e => {
       e.preventDefault();
-      if (!confirm('Save these money settings? They apply to new codes and new withdrawals.')) return;
+      if (!(await zConfirm({ title: 'Save money settings?', text: 'They apply to new codes and new withdrawals.', confirmText: 'Save' }))) return;
       const msg = $('st-msg');
       try {
         await api('/admin/settings', { method: 'PATCH', body: JSON.stringify({
