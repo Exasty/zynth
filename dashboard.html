@@ -1617,11 +1617,12 @@ function applyLicense(lic, user) {
     });
   };
 
-  // Unlock download — passes discord_id + key as query params for server-side auth
+  // Unlock download. The link is fetched on click: the API checks the Discord login and
+  // license and returns a single-use link valid for ~60 s (the key never goes in a URL).
   if (!isExpired && user) {
     const dlBtn = document.getElementById('btn-download');
     dlBtn.classList.remove('locked');
-    dlBtn.href = `${API_URL}/download/zynth-client.jar?discord_id=${encodeURIComponent(user.id)}&key=${encodeURIComponent(fullKey)}`;
+    dlBtn.href = '#download';
     document.getElementById('dl-desc').textContent = 'Fabric 1.21.11 · Needs Fabric API and Java 21+';
   }
 
@@ -2024,7 +2025,7 @@ function setupHWIDReset(user, lic) {
   const msg = document.getElementById('hwid-msg');
 
   btn.addEventListener('click', async () => {
-    if (!confirm('Reset your HWID? The mod will bind to whichever PC you next launch it on.')) return;
+    if (!confirm('Reset your HWID? Your current installation stops working. Download Zynth again from this dashboard on the PC you want to use.')) return;
 
     btn.disabled    = true;
     btn.textContent = 'Resetting…';
@@ -2123,6 +2124,39 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   showLogin(); toast('Logged out.');
 });
 
+// ── STAFF: confirm an HWID reset requested from Discord ───────
+// The bot's !resethwid only creates a request. It takes effect when the same staff
+// member confirms it here while logged in, so the bot's secret alone can't reset HWIDs.
+// The id survives the Discord login round-trip in sessionStorage.
+(function rememberResetRequest() {
+  const q = new URLSearchParams(location.search);
+  const id = q.get('hwid_reset');
+  if (!id) return;
+  if (/^hr_[a-z2-7]{26}$/.test(id)) sessionStorage.setItem('zynth_hwid_reset', id);
+  q.delete('hwid_reset');
+  history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash);
+})();
+
+async function confirmPendingReset() {
+  const id = sessionStorage.getItem('zynth_hwid_reset');
+  if (!id) return;
+  sessionStorage.removeItem('zynth_hwid_reset');
+  try {
+    const res = await fetch(`${API_URL}/admin/hwid-reset-requests/${id}`);
+    const data = await res.json();
+    if (!res.ok) { toast(data.error || 'Reset request not found.', 'red'); return; }
+    const r = data.request;
+    if (r.status !== 'pending') { toast('That HWID reset was already confirmed.'); return; }
+    if (!confirm(`Confirm HWID reset for Discord user ${r.target_discord_id}?\n\nReason: ${r.reason}\n\nTheir current installation stops working.`)) return;
+    const done = await fetch(`${API_URL}/admin/hwid-reset-requests/${id}/confirm`, { method: 'POST' });
+    const out = await done.json();
+    if (done.ok) toast('HWID reset confirmed.', 'green');
+    else toast(out.error || 'Could not confirm the reset.', 'red');
+  } catch (e) {
+    toast('Could not reach the server: ' + e.message, 'red');
+  }
+}
+
 // ── INIT ──────────────────────────────────────────────────────
 async function init() {
   takeTokenFromUrl();
@@ -2132,6 +2166,7 @@ async function init() {
   try { user = await loadDiscordUser(token); }
   catch { localStorage.removeItem('blizz_dc_token'); showLogin(); return; }
   renderDashboard(user);
+  confirmPendingReset();
 }
 
 init();
@@ -2375,10 +2410,21 @@ function setupImageUpload(user, lic) {
   const check    = document.getElementById('dlm-check');
   let   pendingHref = null;
 
+  async function startDownload() {
+    try {
+      const res = await fetch(`${API_URL}/client/download-ticket`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok || !data.url) { toast(data.error || 'Could not start the download.', 'red'); return; }
+      window.location.href = data.url;
+    } catch (e) {
+      toast('Could not reach the server: ' + e.message, 'red');
+    }
+  }
+
   function openModal(href) {
     // If user previously checked "don't show again", skip modal
     if (localStorage.getItem('blizz_dl_skip') === '1') {
-      window.location.href = href;
+      startDownload();
       return;
     }
     pendingHref = href;
@@ -2397,7 +2443,7 @@ function setupImageUpload(user, lic) {
     if (check.checked) localStorage.setItem('blizz_dl_skip', '1');
     const href = pendingHref; // save before closeModal() nulls it
     closeModal();
-    if (href) window.location.href = href;
+    if (href) startDownload();
   });
 
   // Intercept the download button click
