@@ -1322,6 +1322,14 @@ footer {
       <div class="tiles" id="codes-overview"></div>
 
       <div class="panel-box">
+        <div class="panel-head"><div><h3>Media applications</h3><div class="sub">Approving creates the partner, their media license and their creator code. The applicant gets a Discord DM either way.</div></div></div>
+        <div class="toolbar">
+          <select id="apps-status" aria-label="Status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option><option value="all">All</option></select>
+        </div>
+        <div class="rows" id="apps-list"><div class="loading-note">Loading…</div></div>
+      </div>
+
+      <div class="panel-box">
         <h3>Create a code</h3>
         <div class="sub">Media codes give the customer €0.50 off and the owner €0.50 per paid order. Promo codes are normal discounts.</div>
         <form id="code-form" autocomplete="off">
@@ -2008,7 +2016,10 @@ async function loadHWIDStatus(user, lic) {
       return;
     }
 
-    if (left <= 0) {
+    if (data.unlimited) {
+      infoEl.textContent = `Dev: unlimited resets · ${used} used this month`;
+      btn.disabled = false;
+    } else if (left <= 0) {
       infoEl.textContent = `Both resets used this month. Resets on the 1st.`;
       btn.disabled = true;
     } else {
@@ -2871,6 +2882,8 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     setupCodeForm();
     loadCodeOverview();
     loadCodeList();
+    loadApplications();
+    $('apps-status').onchange = loadApplications;
     let t;
     $('codes-search').oninput = () => { clearTimeout(t); t = setTimeout(loadCodeList, 250); };
     $('codes-type').onchange = loadCodeList;
@@ -2973,6 +2986,64 @@ document.getElementById('btn-logout').addEventListener('click', () => {
             redemptions.map(r => `<tr><td>${esc(r.ref)}</td><td>${esc(r.product)}</td><td>${badge(r.status === 'completed' ? 'paid' : r.status)}</td><td>${fmtDate(r.created_at)}</td><td>${eur(r.discount_cents)}</td></tr>`).join('') + '</tbody></table>'
             : '<div class="empty-note">Not used yet.</div>';
         } catch (err) { d.innerHTML = `<div class="empty-note">${esc(err.message)}</div>`; }
+      });
+    } catch (e) { list.innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
+  }
+
+  // ── MEDIA APPLICATIONS (Dev) ────────────────────────────────
+  async function loadApplications() {
+    const list = $('apps-list');
+    try {
+      const { applications } = await api('/admin/media/applications?status=' + $('apps-status').value);
+      if (!applications.length) { list.innerHTML = '<div class="empty-note">No applications here.</div>'; return; }
+      list.innerHTML = applications.map(a => `
+        <div class="row" data-app-id="${a.id}">
+          <div class="main">
+            <div class="title">#${a.id} ${esc(a.applicant_username || '')} <span style="font-family:var(--mono)">(${esc(a.applicant_discord_id)})</span> ${badge(a.status)}</div>
+            <div class="meta">${esc(a.platform)} · ${/^https?:\/\//i.test(a.channel_url || '') ? `<a href="${esc(a.channel_url)}" target="_blank" rel="noopener noreferrer">${esc(a.channel_url)}</a>` : esc(a.channel_url)}
+              ${a.audience_size != null ? ` · ${esc(a.audience_size)} followers` : ''}${a.desired_code ? ` · wants <b>${esc(a.desired_code)}</b>` : ''}
+              · ${payoutName(a.payout_method)} · applied ${fmtDate(a.created_at)}
+              ${a.created_code ? ` · code ${esc(a.created_code)}` : ''}${a.rejection_reason ? ` · rejected: ${esc(a.rejection_reason)}` : ''}</div>
+            <div class="meta" style="margin-top:6px">${esc(a.application_reason)}</div>
+          </div>
+          <div class="right"><div class="actions" style="margin-top:0">
+            <button class="mini-btn" data-app-details="${a.id}">Payout details</button>
+            ${a.status === 'pending' ? `<button class="mini-btn primary" data-app-approve="${a.id}" data-code="${esc(a.desired_code || '')}">Approve</button>
+            <button class="mini-btn danger" data-app-reject="${a.id}">Reject</button>` : ''}
+          </div></div>
+        </div>`).join('');
+      list.querySelectorAll('[data-app-details]').forEach(btn => btn.onclick = async () => {
+        const row = btn.closest('.row');
+        const open = row.querySelector('.detail');
+        if (open) { open.remove(); return; }
+        const d = document.createElement('div');
+        d.className = 'detail'; d.innerHTML = '<div class="loading-note">Loading…</div>';
+        row.appendChild(d);
+        try {
+          const { application: a } = await api(`/admin/media/applications/${btn.dataset.appDetails}`);
+          d.innerHTML = `<div class="meta">${payoutName(a.payout_method)}: <span style="font-family:var(--mono)">${esc(a.payout_details)}</span></div>`;
+        } catch (err) { d.innerHTML = `<div class="empty-note">${esc(err.message)}</div>`; }
+      });
+      list.querySelectorAll('[data-app-approve]').forEach(btn => btn.onclick = async () => {
+        const code = prompt('Creator code for this partner (leave as is to use the one they asked for):', btn.dataset.code);
+        if (code === null) return;
+        btn.disabled = true;
+        try {
+          const r = await api(`/admin/media/applications/${btn.dataset.appApprove}/approve`, { method: 'POST', body: JSON.stringify({ code: code.trim() || null }) });
+          toast(r.note || 'Application approved.', r.note ? 'red' : 'green');
+          loadApplications(); loadCodeOverview(); loadCodeList();
+        } catch (err) { toast(err.message, 'red'); btn.disabled = false; }
+      });
+      list.querySelectorAll('[data-app-reject]').forEach(btn => btn.onclick = async () => {
+        const reason = prompt('Reason for rejecting (the applicant sees this):');
+        if (reason === null) return;
+        if (reason.trim().length < 3) { toast('The reason needs at least 3 characters.', 'red'); return; }
+        btn.disabled = true;
+        try {
+          await api(`/admin/media/applications/${btn.dataset.appReject}/reject`, { method: 'POST', body: JSON.stringify({ reason: reason.trim() }) });
+          toast('Application rejected.', 'green');
+          loadApplications();
+        } catch (err) { toast(err.message, 'red'); btn.disabled = false; }
       });
     } catch (e) { list.innerHTML = `<div class="empty-note">${esc(e.message)}</div>`; }
   }
