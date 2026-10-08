@@ -1,60 +1,61 @@
-/* Zynth foundation: tokens, reset and browser surfaces.
+/* Zynth foundation: tokens, reset, browser surfaces and shared primitives.
    Loaded by every page before its own stylesheet (zynth.css or dashboard.css). */
 
 :root {
   color-scheme: dark;
 
-  /* Surfaces: graphite with a faint violet cast taken from the logo */
-  --bg: #0A090C;
-  --bg-sunk: #070609;
-  --surface: #121116;
-  --surface-2: #18171D;
-  --surface-3: #201F26;
-  --line: rgba(255, 255, 255, .07);
-  --line-2: rgba(255, 255, 255, .11);
-  --line-3: rgba(255, 255, 255, .18);
+  /* Night violet, sampled toward the logo's y */
+  --bg: #0D0A18;
+  --bg-sunk: #08060F;
+  --surface: #151026;
+  --surface-2: #1C1631;
+  --surface-3: #261E40;
+  --line: rgba(196, 170, 255, .09);
+  --line-2: rgba(196, 170, 255, .15);
+  --line-3: rgba(196, 170, 255, .26);
 
   /* Text */
-  --fg: #F4F2F7;
-  --fg-2: #CBC8D2;
-  --fg-3: #A29EAC;
-  --fg-4: #86828F;
+  --fg: #F5F1FF;
+  --fg-2: #D4CCEA;
+  --fg-3: #ADA3CC;
+  --fg-4: #9890B8;
 
-  /* Brand: sampled from ZynthLogo.png (pink Z into violet y) */
+  /* Brand: ZynthLogo.png, pink Z into violet y */
   --pink: #FF4FA8;
-  --pink-hi: #FF7EC0;
-  --pink-ink: #26040F;
-  --pink-soft: rgba(255, 79, 168, .12);
-  --pink-line: rgba(255, 79, 168, .38);
-  --violet: #C35DFF;
-  --violet-hi: #D68BFF;
-  --violet-soft: rgba(195, 93, 255, .13);
+  --pink-hi: #FF78BD;
+  --pink-ink: #2A0518;
+  --pink-soft: rgba(255, 79, 168, .13);
+  --pink-line: rgba(255, 79, 168, .5);
+  --violet: #B66BFF;
+  --violet-hi: #CF9BFF;
+  --violet-soft: rgba(182, 107, 255, .15);
 
   /* Status */
-  --ok: #45D98F;
-  --ok-soft: rgba(69, 217, 143, .12);
-  --warn: #F5B941;
-  --warn-soft: rgba(245, 185, 65, .12);
-  --err: #FF6E6E;
-  --err-soft: rgba(255, 110, 110, .12);
+  --ok: #4ADE8C;
+  --ok-soft: rgba(74, 222, 140, .12);
+  --warn: #FFC547;
+  --warn-soft: rgba(255, 197, 71, .12);
+  --err: #FF6B6B;
+  --err-soft: rgba(255, 107, 107, .12);
   --discord: #5865F2;
   --discord-hi: #4752C4;
 
   /* Type */
-  --font: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --display: "Bricolage Grotesque", "Geist", ui-sans-serif, system-ui, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --display: "Unbounded", "Onest", system-ui, sans-serif;
+  --font: "Onest", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 
   /* Shape */
-  --r-xs: 6px;
-  --r-sm: 8px;
-  --r: 12px;
-  --r-lg: 16px;
+  --r-xs: 7px;
+  --r-sm: 10px;
+  --r: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
 
-  /* Depth: offset + soft blur, never a coloured halo */
-  --shadow-1: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 1px 2px rgba(0, 0, 0, .4);
-  --shadow-2: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 8px 24px -8px rgba(0, 0, 0, .6);
-  --shadow-3: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 24px 64px -16px rgba(0, 0, 0, .75);
+  /* Depth: offset + soft blur in near-black, never a coloured halo */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .35);
+  --shadow-2: 0 10px 30px -12px rgba(0, 0, 0, .7);
+  --shadow-3: 0 30px 80px -20px rgba(0, 0, 0, .85);
 
   /* Motion */
   --ease-out: cubic-bezier(.23, 1, .32, 1);
@@ -66,53 +67,69 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 88px; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 92px; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--fg-2);
-  font: 400 15px/1.6 var(--font);
-  font-feature-settings: "ss01", "cv11";
+  font: 400 16px/1.6 var(--font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
 }
 
 h1, h2, h3, h4, h5, p, figure, blockquote, dl, dd { margin: 0; }
-h1, h2, h3, h4 { color: var(--fg); font-weight: 600; text-wrap: balance; }
-/* Display face for page and section titles; UI headings stay in the text face */
-h1, .h2 { font-family: var(--display); font-optical-sizing: auto; }
+h1, h2, h3, h4 { color: var(--fg); font-weight: 600; text-wrap: balance; letter-spacing: -.01em; }
+h1, .h1, .h2 { font-family: var(--display); font-weight: 700; letter-spacing: -.035em; }
 p { text-wrap: pretty; }
 a { color: inherit; text-decoration: none; }
 img, svg, video { display: block; max-width: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { -webkit-user-select: none; user-select: none; }
-code, kbd, samp { font-family: var(--mono); font-size: .92em; }
+code, kbd, samp { font-family: var(--mono); font-size: .9em; }
 [hidden] { display: none !important; }
 
 /* Browser surfaces */
-::selection { background: rgba(255, 79, 168, .32); color: #fff; }
+::selection { background: rgba(255, 79, 168, .35); color: #fff; }
 input, textarea { caret-color: var(--pink); }
 ::placeholder { color: var(--fg-4); opacity: 1; }
 :focus { outline: none; }
-:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; border-radius: var(--r-xs); }
+:focus-visible { outline: 2px solid var(--pink); outline-offset: 3px; border-radius: 6px; }
 html { scrollbar-color: var(--surface-3) var(--bg); scrollbar-width: thin; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--surface-3); border: 3px solid var(--bg); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #2E2C36; }
+
+/* ── Shared primitives ───────────────────────────────────────── */
+
+/* A card: one hairline border and a faint lit top edge */
+.blk {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .025), transparent 40%), var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), var(--shadow-1);
+}
+
+/* Icons from assets/icons.svg */
+/* .i is the inline-SVG variant used in page markup (viewBox drawn in place) */
+.i { width: 16px; height: 16px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.pi { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.pi.sm { width: 16px; height: 16px; }
+.pi.xs { width: 13px; height: 13px; stroke-width: 2.2; }
+
+/* Progress bar */
+.xp { position: relative; height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.xp > i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--violet)); }
 
 .num, .tnum { font-variant-numeric: tabular-nums; }
 .mono { font-family: var(--mono); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.i { width: 16px; height: 16px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 1ms !important; animation-iteration-count: 1 !important;
+    animation-duration: 1ms !important; animation-iteration-count: 1 !important; animation-delay: 0ms !important;
     transition-duration: 1ms !important; scroll-behavior: auto !important;
   }
 }

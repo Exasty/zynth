@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Checkout · Zynth Client</title>
-<meta name="theme-color" content="#0A090C">
+<meta name="theme-color" content="#0D0A18">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="zynth.css">
 
@@ -42,7 +42,7 @@
   .opt input:disabled + .opt-box { opacity: .45; cursor: not-allowed; }
   .opt-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; }
   .opt-name { font-weight: 500; font-size: 15px; color: var(--fg); }
-  .opt-price { font-size: 26px; line-height: 1.1; font-weight: 600; letter-spacing: -.035em; color: var(--fg); font-variant-numeric: tabular-nums; }
+  .opt-price { font-family: var(--display); font-size: 24px; line-height: 1.15; font-weight: 700; letter-spacing: -.05em; color: var(--fg); font-variant-numeric: tabular-nums; }
   .opt-sub { color: var(--fg-3); font-size: 13.5px; line-height: 1.45; }
   .opt-icon { width: 32px; height: 32px; border-radius: var(--r-sm); display: grid; place-items: center; background: var(--surface-3); color: var(--fg-2); transition: background-color var(--t-fast) ease, color var(--t-fast) ease; }
   .opt input:checked + .opt-box .opt-icon { background: var(--pink-soft); color: var(--pink-hi); }
@@ -88,7 +88,7 @@
   .line .neg { color: var(--ok) !important; }
   .total { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 0 20px; }
   .total span { color: var(--fg-2); }
-  .total b { font-size: 32px; line-height: 1; font-weight: 600; letter-spacing: -.04em; color: var(--fg); font-variant-numeric: tabular-nums; }
+  .total b { font-family: var(--display); font-size: 30px; line-height: 1; font-weight: 700; letter-spacing: -.05em; color: var(--fg); font-variant-numeric: tabular-nums; }
   .error { color: var(--err); font-size: 13.5px; margin-top: 12px; }
   .error:empty { display: none; }
   .trust { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.5; color: var(--fg-3); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
@@ -118,7 +118,7 @@
 
 <nav class="top solid">
   <div class="wrap bar">
-    <a class="brand" href="index.html" aria-label="Zynth home"><img src="assets/zynth-mark-64.png" alt="" width="30" height="30">Zynth</a>
+    <a class="brand" href="index.html" aria-label="Zynth home"><img src="assets/zynth-mark-64.png" alt="" width="34" height="34">Zynth</a>
     <div class="navlinks">
       <a href="sneak-peeks.html">Sneak Peeks</a>
       <a href="index.html#pricing">Pricing</a>
@@ -127,8 +127,8 @@
     <div class="nav-right">
       <a href="dashboard.html" class="btn btn-secondary btn-sm">Dashboard</a>
       <button class="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-        <svg class="i i-open" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/></svg>
-        <svg class="i i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        <svg class="pi i-open" aria-hidden="true"><use href="assets/icons.svg#i-menu"/></svg>
+        <svg class="pi i-close" aria-hidden="true"><use href="assets/icons.svg#i-x"/></svg>
       </button>
     </div>
   </div>
@@ -142,7 +142,7 @@
 
     <!-- ── STATUS VIEW (after paying) ── -->
     <section id="status-view" hidden>
-      <div class="panel status-card" id="status-card" aria-live="polite"></div>
+      <div class="blk status-card" id="status-card" aria-live="polite"></div>
     </section>
 
     <!-- ── CHECKOUT FORM ── -->
@@ -226,7 +226,7 @@
           </fieldset>
         </div>
 
-        <aside class="panel summary" aria-label="Order summary">
+        <aside class="blk summary" aria-label="Order summary">
           <h2>Order summary</h2>
           <div id="account"></div>
           <div class="lines">
