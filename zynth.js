@@ -7,10 +7,11 @@ window.ZYNTH_API_URL = 'https://license-api.exasty.workers.dev';
 window.ZYNTH_DISCORD_CLIENT_ID = '1555931215180079236';
 
 (function () {
-  // Nav background once you scroll
   var nav = document.querySelector('nav.top');
+
+  // Nav background once you scroll
   if (nav && !nav.classList.contains('solid')) {
-    var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 20); };
+    var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 8); };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
@@ -19,25 +20,26 @@ window.ZYNTH_DISCORD_CLIENT_ID = '1555931215180079236';
   var burger = document.querySelector('.burger');
   var menu = document.querySelector('.mobile-menu');
   if (burger && menu) {
-    burger.addEventListener('click', function () {
-      var open = menu.classList.toggle('open');
+    var setOpen = function (open) {
+      menu.classList.toggle('open', open);
+      nav.classList.toggle('menu-open', open);
       burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) nav.classList.add('scrolled');
+      burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    };
+    burger.addEventListener('click', function () { setOpen(!menu.classList.contains('open')); });
+    menu.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { setOpen(false); }); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.classList.contains('open')) { setOpen(false); burger.focus(); }
     });
-    menu.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () { menu.classList.remove('open'); burger.setAttribute('aria-expanded', 'false'); });
-    });
+    window.addEventListener('resize', function () { if (window.innerWidth > 860) setOpen(false); });
   }
 
-  // Fade sections in as they scroll into view
-  var els = document.querySelectorAll('.reveal');
+  // Elements with [data-inview] get .in once they scroll into view (used for one-off drawings, not fades)
+  var els = document.querySelectorAll('[data-inview]');
+  if (!els.length) return;
   if (!('IntersectionObserver' in window)) { els.forEach(function (el) { el.classList.add('in'); }); return; }
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
-  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
-  els.forEach(function (el) {
-    var i = el.parentElement ? Array.prototype.indexOf.call(el.parentElement.children, el) : 0;
-    el.style.transitionDelay = Math.min(i, 3) * 80 + 'ms';
-    io.observe(el);
-  });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.2 });
+  els.forEach(function (el) { io.observe(el); });
 })();
