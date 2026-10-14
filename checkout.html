@@ -28,6 +28,12 @@
   .step-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
   .step-num { font: 500 12px/1 var(--mono); color: var(--fg-4); }
   .step-head h2 { font-size: 17px; letter-spacing: -.015em; }
+  .cur-switch { margin-left: auto; display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line-2); }
+  .cur-switch[hidden] { display: none; }
+  .cur-switch button { height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--fg-3); font: 500 13px var(--font); cursor: pointer; transition: background-color var(--t-fast) ease, color var(--t-fast) ease; }
+  .cur-switch button:hover { color: var(--fg); }
+  .cur-switch button[aria-checked="true"] { background: var(--pink); color: #fff; }
+  .cur-switch button:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
   .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   @media (max-width: 520px) { .options { grid-template-columns: 1fr; } }
@@ -154,7 +160,12 @@
       <div class="layout">
         <div>
           <fieldset class="step">
-            <div class="step-head"><h2>Choose your plan</h2></div>
+            <div class="step-head"><h2>Choose your plan</h2>
+              <div class="cur-switch" id="cur-switch" role="radiogroup" aria-label="Currency" hidden>
+                <button type="button" role="radio" data-cur="eur" aria-checked="true">€ EUR</button>
+                <button type="button" role="radio" data-cur="usd" aria-checked="false">$ USD</button>
+              </div>
+            </div>
             <div class="options" id="products">
               <label class="opt">
                 <input type="radio" name="product" value="monthly">
@@ -248,7 +259,10 @@
   const SAVED = 'zynth_checkout_draft';
 
   const $ = id => document.getElementById(id);
-  const euros = c => '€' + (c / 100).toFixed(2);
+  const CUR_KEY = 'zynth_currency';
+  let currency = 'eur';
+  // Amounts in the chosen currency (or the order's own currency on the status page).
+  const euros = (c, cur = currency) => (cur === 'usd' ? '$' : '€') + (c / 100).toFixed(2);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const store = {
     get: k => { try { return localStorage.getItem(k); } catch { return null; } },
@@ -256,7 +270,7 @@
     del: k => { try { localStorage.removeItem(k); } catch {} },
   };
 
-  let user = null, cfg = null, applied = null, busy = false;
+  let user = null, cfg = null, applied = null, busy = false, blocked = null;   // blocked: why this account can't buy (already licensed)
 
   // ── API ─────────────────────────────────────────────────────
   async function api(path, opts = {}) {
@@ -303,7 +317,7 @@
     if (user) {
       el.innerHTML = `<div class="account"><img src="${avatar(user)}" alt=""><div><div class="who">${esc(user.global_name || user.username)}</div>
         <div class="sub">Your key goes to this Discord account</div></div><button class="switch" id="logout" type="button">Switch</button></div>`;
-      $('logout').onclick = () => { store.del(TOKEN_KEY); user = null; renderAccount(); updatePay(); };
+      $('logout').onclick = () => { store.del(TOKEN_KEY); user = null; blocked = null; $('pay-error').textContent = ''; renderAccount(); updatePay(); };
     } else {
       el.innerHTML = `<div class="account"><div><div class="who">Log in to continue</div><div class="sub">Your key is linked to your Discord account</div></div></div>`;
     }
@@ -329,12 +343,34 @@
     if (code) $('code').value = code;
   }
 
-  function priceOf(id) { return cfg?.products.find(p => p.id === id)?.price_cents ?? (id === 'monthly' ? 1000 : 1500); }
+  function priceOf(id) {
+    const p = cfg?.products.find(x => x.id === id);
+    return p?.prices?.[currency] ?? p?.price_cents ?? (id === 'monthly' ? 1000 : 1500);
+  }
+
+  // € / $: the buyer's earlier choice, otherwise euros in Europe and dollars elsewhere.
+  function guessCurrency() {
+    const saved = store.get(CUR_KEY);
+    if (saved === 'eur' || saved === 'usd') return saved;
+    let tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch {}
+    return tz.startsWith('Europe/') ? 'eur' : 'usd';
+  }
+  function setCurrency(cur, remember) {
+    const allowed = cfg?.currencies?.length ? cfg.currencies : ['eur'];
+    currency = allowed.includes(cur) ? cur : allowed[0];
+    if (remember) store.set(CUR_KEY, currency);
+    document.querySelectorAll('#cur-switch button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.cur === currency)));
+    for (const p of cfg?.products || []) {
+      const el = document.querySelector(`[data-price="${p.id}"]`);
+      if (el) el.textContent = euros(priceOf(p.id)).replace('.00', '');
+    }
+  }
   function feeOf(m) { return cfg?.methods?.[m]?.fee_cents || 0; }
 
   function renderSummary() {
     const base = priceOf(product());
-    const discount = applied && applied.product === product() && applied.method === method() ? applied.discount_cents : 0;
+    const discount = applied && applied.product === product() && applied.method === method() && applied.currency === currency ? applied.discount_cents : 0;
     const fee = base - discount === 0 ? 0 : feeOf(method());
     $('sum-product').textContent = product() === 'monthly' ? 'Zynth Monthly' : 'Zynth Lifetime';
     $('sum-base').textContent = euros(base);
@@ -350,6 +386,7 @@
   function updatePay() {
     const btn = $('pay');
     if (!user) { btn.textContent = 'Log in with Discord'; btn.disabled = false; return; }
+    if (blocked) { btn.disabled = false; btn.textContent = 'Go to dashboard'; return; }
     btn.disabled = busy || !cfg?.methods?.sellauth?.available;
     btn.textContent = busy ? 'Starting payment…' : 'Continue to payment';
   }
@@ -363,12 +400,12 @@
     if (!user) { if (!silent) { msg.className = 'code-msg err'; msg.textContent = 'Log in first to use a code.'; } return; }
     $('apply-code').disabled = true;
     try {
-      const r = await api('/checkout/validate-code', { method: 'POST', body: JSON.stringify({ product: product(), method: method(), code }) });
+      const r = await api('/checkout/validate-code', { method: 'POST', body: JSON.stringify({ product: product(), method: method(), code, currency }) });
       if (!r.valid) {
         applied = null;
         msg.className = 'code-msg err'; msg.textContent = r.error;
       } else {
-        applied = { ...r.code, product: product(), method: method() };
+        applied = { ...r.code, product: product(), method: method(), currency };
         $('code-entry').hidden = true;
         $('code-applied').hidden = false;
         $('code-applied').innerHTML = `<span class="code-chip">${esc(r.code.code)} · −${euros(r.code.discount_cents)}<button type="button" id="remove-code" aria-label="Remove code">×</button></span>`;
@@ -396,9 +433,10 @@
   async function pay() {
     $('pay-error').textContent = '';
     if (!user) return login();
+    if (blocked) { location.href = 'dashboard.html'; return; }
     if (!$('final-sale').checked) { $('pay-error').textContent = 'Please confirm that all sales are final before paying.'; $('final-sale').focus(); return; }
     if (!window.sellAuth) { $('pay-error').textContent = "The payment window couldn't load. If you use an ad blocker, allow this site and reload."; return; }
-    const body = { product: product(), method: method(), code: applied?.code || undefined,
+    const body = { product: product(), method: method(), code: applied?.code || undefined, currency,
       accept_final_sale: true, final_sale_version: cfg?.final_sale?.version };
     busy = true; updatePay();
     try {
@@ -453,7 +491,7 @@
       catch (e) { return statusCard('bad', "We couldn't find that order", esc(e.message), '<a class="btn btn-secondary" href="checkout.html">Back to checkout</a>'); }
 
       const receipt = `<div class="receipt"><div><span>Order</span>${esc(o.ref)}</div><div><span>Plan</span>${esc(o.product_name)}</div>
-        ${o.code ? `<div><span>Code</span>${esc(o.code)} (−${euros(o.discount_cents)})</div>` : ''}<div><span>Total</span>${euros(o.total_cents)}</div></div>`;
+        ${o.code ? `<div><span>Code</span>${esc(o.code)} (−${euros(o.discount_cents, o.currency)})</div>` : ''}<div><span>Total</span>${euros(o.total_cents, o.currency)}</div></div>`;
 
       if (o.status === 'paid') {
         statusCard('ok', 'Payment confirmed', 'Your license is active. We also sent the key to your Discord DMs.',
@@ -498,16 +536,27 @@
       return;
     }
     if (cfg.final_sale?.text) $('final-sale-text').textContent = cfg.final_sale.text;
-    for (const p of cfg.products) {
-      const el = document.querySelector(`[data-price="${p.id}"]`);
-      if (el) el.textContent = euros(p.price_cents).replace('.00', '');
-    }
+    $('cur-switch').hidden = !(cfg.currencies?.length > 1);
+    setCurrency(guessCurrency(), false);
     if (!cfg.methods.sellauth?.available) {
       document.querySelector('input[name=method][value="sellauth"]').disabled = true;
       $('sellauth-sub').textContent = 'Not available right now';
       $('pay-error').textContent = 'Checkout is offline right now. Please try again in a few minutes.';
       $('pay').disabled = true;
     }
+  }
+
+  // One license per account (Devs excepted): say so before anyone starts paying.
+  async function loadEligibility() {
+    blocked = null;
+    if (!user) return;
+    try {
+      const r = await api('/checkout/eligibility');
+      if (!r.can_buy) {
+        blocked = r.reason;
+        $('pay-error').textContent = r.reason + ' You can manage it on your dashboard.';
+      }
+    } catch { /* the server checks again when the order is created */ }
   }
 
   // ── Start ───────────────────────────────────────────────────
@@ -518,12 +567,19 @@
       if (applied) { const c = applied.code; removeCode(); $('code').value = c; applyCode(true); }
       renderSummary();
     }));
+    document.querySelectorAll('#cur-switch button').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.cur === currency) return;
+      setCurrency(b.dataset.cur, true);
+      if (applied) { const c = applied.code; removeCode(); $('code').value = c; applyCode(true); }
+      renderSummary();
+    }));
     $('apply-code').onclick = () => applyCode(false);
     $('code').addEventListener('keydown', e => { if (e.key === 'Enter') applyCode(false); });
     $('pay').onclick = pay;
 
     user = await loadUser();
     await loadConfig();
+    await loadEligibility();
     renderAccount();
     renderSummary();
 
