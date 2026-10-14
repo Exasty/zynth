@@ -189,7 +189,7 @@ html.booting #screen-login { display: none !important; }
 .tag { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 5px; font: 500 11.5px/1 var(--mono); color: var(--fg-2); background: var(--surface-3); white-space: nowrap; }
 
 /* Section shells */
-.h-card, .panel-box, .redeem-section, .hwid-section, .review-section, .imgup-section, .peeks-section, .license-panel, .chart-box, .tile, .h-link, .h-shortcut, .review-item, .clip-card, .card {
+.h-card, .panel-box, .redeem-section, .hwid-section, .review-section, .imgup-section, .peeks-section, .license-panel, .chart-box, .tile, .h-link, .review-item, .clip-card, .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1); min-width: 0;
 }
 .panel-box, .redeem-section, .review-section, .imgup-section, .peeks-section { padding: 24px; margin-bottom: 16px; }
@@ -272,17 +272,53 @@ kbd { display: inline-block; font: 500 12px/1 var(--mono); padding: 3px 6px; bor
 .hwid-info { font: 400 13px/1.5 var(--mono); color: var(--fg-3); margin-bottom: 16px; }
 
 /* Team */
-.h-section-head { display: flex; align-items: center; gap: 10px; margin: 36px 0 14px; }
-.h-section-head h2 { font-size: 20px; letter-spacing: -.025em; }
-.h-shortcuts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.h-shortcut { text-align: left; cursor: pointer; padding: 18px; color: inherit; font: inherit; transition: border-color var(--t-fast) ease, background-color var(--t-fast) ease, transform var(--t-fast) var(--ease-out); }
-.h-shortcut:hover { border-color: var(--line-3); background: var(--surface-2); }
-.h-shortcut:active { transform: scale(.985); }
-.h-shortcut .h-v { font-size: 26px; }
-.h-s { font-size: 13px; color: var(--fg-3); margin-top: 6px; }
 .h-form { display: grid; gap: 12px; }
 .h-form .mini-btn { justify-self: start; height: 38px; padding: 0 16px; font-size: 14px; }
-#team-section .h-grid { align-items: start; }
+
+/* Team panel: one surface, sections divided by hairlines */
+.team { margin: 28px 0 16px; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-lg); box-shadow: var(--shadow-1); overflow: hidden; }
+.team-head { display: flex; align-items: center; gap: 10px; padding: 18px 24px; border-bottom: 1px solid var(--line); }
+.team-head h2 { font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
+.team-actions { margin-left: auto; display: flex; gap: 8px; }
+.team-actions .mini-btn { height: 34px; padding: 0 14px; font-size: 13.5px; }
+.team-stats { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-bottom: 1px solid var(--line); }
+.team-stats:empty { display: none; }
+.team-stat { display: grid; gap: 2px; text-align: left; padding: 18px 24px; background: none; border: 0; cursor: pointer; color: inherit; font: inherit; transition: background-color var(--t-fast) ease; }
+.team-stat + .team-stat { border-left: 1px solid var(--line); }
+.team-stat:hover { background: rgba(255,255,255,.03); }
+.team-stat:focus-visible { outline-offset: -3px; }
+.team-stat .k { font-size: 13px; color: var(--fg-3); }
+.team-stat .v { font-family: var(--display); font-size: 26px; font-weight: 700; letter-spacing: -.04em; color: var(--fg); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.team-stat .s { font-size: 12.5px; color: var(--fg-4); }
+.team-block { padding: 22px 24px; }
+.team-block + .team-block { border-top: 1px solid var(--line); }
+.team-block-head { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.team-block-head h3 { font-size: 15px; font-weight: 600; }
+.team-block-head p { font-size: 13.5px; color: var(--fg-3); }
+.sr-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: 12px; align-items: end; }
+.sr-form .mini-btn { height: 42px; padding: 0 18px; font-size: 14px; }
+#sr-msg:not(:empty) { margin-top: 12px; }
+.log { display: grid; }
+.log-row { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; gap: 6px 20px; align-items: baseline; padding: 12px 0; font-size: 14px; }
+.log-row + .log-row { border-top: 1px solid var(--line); }
+.log-who { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.log-who b { color: var(--fg); font-weight: 500; }
+.log-id { flex-basis: 100%; font: 400 12px/1.3 var(--mono); color: var(--fg-4); }
+.log-what { color: var(--fg-2); overflow-wrap: anywhere; }
+.log-reason { display: block; margin-top: 2px; color: var(--fg-3); }
+.log-when { font: 400 12px/1.4 var(--mono); color: var(--fg-4); white-space: nowrap; }
+.log-empty { font-size: 14px; color: var(--fg-3); }
+@media (max-width: 760px) {
+  .team-head, .team-block { padding-inline: 18px; }
+  .team-stats { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
+  .team-stat { padding: 14px 18px; }
+  .team-stat + .team-stat { border-left: 0; }
+  .team-stat:nth-child(even) { border-left: 1px solid var(--line); }
+  .team-stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .sr-form { grid-template-columns: 1fr; }
+  .sr-form .mini-btn { justify-self: start; }
+  .log-row { grid-template-columns: 1fr; }
+}
 
 .h-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 8px; }
 .h-link { display: flex; align-items: center; gap: 14px; padding: 16px; color: inherit; transition: border-color var(--t-fast) ease, background-color var(--t-fast) ease; }
@@ -302,9 +338,6 @@ kbd { display: inline-block; font: 500 12px/1 var(--mono); padding: 3px 6px; bor
 }
 @media (max-width: 700px) {
   .h-grid, .h-links, .h-facts { grid-template-columns: 1fr; }
-  .h-shortcuts { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .h-shortcut { padding: 14px; }
-  .h-shortcut .h-v { font-size: 22px; }
   .h-span2 { grid-column: auto; }
   .h-hero-main, .h-hero-dl, .h-card, .panel-box, .redeem-section, .review-section, .imgup-section, .peeks-section { padding: 20px; }
   .btn-dl { align-self: stretch; }

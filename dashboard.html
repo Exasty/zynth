@@ -300,26 +300,27 @@
       </div>
 
       <!-- TEAM (staff / dev / finance) -->
-      <section id="team-section" style="display:none">
-        <div class="h-section-head"><h2>Team</h2><span id="team-badge"></span></div>
-        <div class="h-shortcuts" id="team-shortcuts"></div>
-        <div class="h-grid">
-          <section class="h-card" id="staff-reset-card" style="display:none">
-            <div class="h-card-head"><h2>Reset a user's HWID</h2></div>
-            <div class="h-note">For tickets. Does not use the user's own monthly resets.</div>
-            <form id="staff-reset-form" class="h-form" autocomplete="off">
-              <div class="f"><label for="sr-id">Discord ID</label><input id="sr-id" inputmode="numeric" placeholder="123456789012345678" required></div>
-              <div class="f"><label for="sr-reason">Reason</label><input id="sr-reason" maxlength="300" placeholder="Ticket #123, new PC" required></div>
-              <button class="mini-btn primary" type="submit" id="sr-submit">Reset HWID</button>
-              <div class="msg" id="sr-msg" aria-live="polite"></div>
-            </form>
-          </section>
-          <section class="h-card h-span2" id="staff-log-section" style="display:none">
-            <div class="h-card-head"><h2>Staff activity</h2><span class="access-badge dev">Dev</span></div>
-            <div class="h-note">Every license revoke and ban ("Execute"), newest first.</div>
-            <div class="review-list" id="staff-log-list"></div>
-          </section>
+      <section id="team-section" class="team" style="display:none" aria-labelledby="team-title">
+        <div class="team-head">
+          <h2 id="team-title">Team</h2><span id="team-badge"></span>
+          <div class="team-actions" id="team-actions"></div>
         </div>
+        <div class="team-stats" id="team-shortcuts"></div>
+
+        <section class="team-block" id="staff-reset-card" style="display:none">
+          <div class="team-block-head"><h3>Reset a user's HWID</h3><p>For tickets. Does not use the user's own monthly resets.</p></div>
+          <form id="staff-reset-form" class="sr-form" autocomplete="off">
+            <div class="f"><label for="sr-id">Discord ID</label><input id="sr-id" inputmode="numeric" placeholder="123456789012345678" required></div>
+            <div class="f"><label for="sr-reason">Reason</label><input id="sr-reason" maxlength="300" placeholder="Ticket #123, new PC" required></div>
+            <button class="mini-btn primary" type="submit" id="sr-submit">Reset HWID</button>
+          </form>
+          <div class="msg" id="sr-msg" aria-live="polite"></div>
+        </section>
+
+        <section class="team-block" id="staff-log-section" style="display:none">
+          <div class="team-block-head"><h3>Staff activity</h3><p>Every license revoke and ban ("Execute"), newest first.</p></div>
+          <div class="log" id="staff-log-list"></div>
+        </section>
       </section>
 
       <div class="h-links">
@@ -951,26 +952,22 @@ async function loadStaffActions() {
   try {
     const res = await fetch(`${API_URL}/dev/actions?discord_id=${encodeURIComponent(CURRENT_USER.id)}&key=${encodeURIComponent(CURRENT_LIC.key)}`);
     const data = await res.json();
-    if (!res.ok) { list.innerHTML = `<div class="empty-note">${escapeHtml(data.error || 'Could not load log.')}</div>`; return; }
+    if (!res.ok) { list.innerHTML = `<p class="log-empty">${escapeHtml(data.error || 'Could not load log.')}</p>`; return; }
     const actions = data.actions || [];
-    if (!actions.length) { list.innerHTML = `<div class="empty-note">No Execute actions logged yet.</div>`; return; }
+    if (!actions.length) { list.innerHTML = `<p class="log-empty">No Execute actions logged yet.</p>`; return; }
 
     list.innerHTML = actions.map(a => {
       const roleBadge = a.actor_role === 'dev' ? `<span class="access-badge dev">dev</span>` : `<span class="access-badge staff">staff</span>`;
       const when = new Date(a.created_at).toLocaleString();
+      const banned = a.banned === 'queued' ? 'in progress' : a.banned ? 'yes' : 'no';
       return `
-        <div class="review-item">
-          <div class="review-item-top">
-            <div class="review-item-user">
-              <span class="review-item-name">${escapeHtml(a.actor_username || 'Unknown')} (<code>${escapeHtml(a.actor_discord_id)}</code>)</span>
-              ${roleBadge}
-            </div>
-            <span class="tag">${when}</span>
+        <div class="log-row">
+          <div class="log-who"><b>${escapeHtml(a.actor_username || 'Unknown')}</b> ${roleBadge}<span class="log-id">${escapeHtml(a.actor_discord_id)}</span></div>
+          <div class="log-what">
+            Executed on <code>${escapeHtml(a.target_discord_id)}</code> · key ${a.key_revoked ? `<code>${escapeHtml(a.key_revoked)}</code>` : 'none on file'} · banned: ${banned}
+            ${a.reason ? `<span class="log-reason">${escapeHtml(a.reason)}</span>` : ''}
           </div>
-          <div class="review-item-text">
-            Executed on target <code>${escapeHtml(a.target_discord_id)}</code> — key ${a.key_revoked ? `<code>${escapeHtml(a.key_revoked)}</code>` : 'none on file'}, banned: ${a.banned === 'queued' ? 'in progress' : a.banned ? 'yes' : 'no'}.
-            ${a.reason ? `<br>Reason: ${escapeHtml(a.reason)}` : ''}
-          </div>
+          <time class="log-when">${when}</time>
         </div>`;
     }).join('');
   } catch (e) {
@@ -1953,20 +1950,21 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     $('team-badge').innerHTML = access.is_dev ? '<span class="access-badge dev">Dev</span>'
       : access.is_staff ? '<span class="access-badge staff">Staff</span>' : '';
 
-    const cards = [];
+    // Counts that need attention, as one strip; each opens its tab. Actions sit in the header.
+    const stats = [];
     if (access.is_dev) {
-      cards.push({ tab: 'mediamgr', k: 'Media applications', id: 'ts-apps', s: 'waiting for review' });
-      cards.push({ tab: 'codes', k: 'Discount codes', id: 'ts-codes', s: 'active codes' });
-      cards.push({ tab: 'peeks', k: 'Sneak peeks', id: null, v: 'Post', s: 'share a new preview' });
+      stats.push({ tab: 'mediamgr', k: 'Applications', id: 'ts-apps', s: 'waiting for review' });
+      stats.push({ tab: 'codes', k: 'Discount codes', id: 'ts-codes', s: 'active' });
     }
-    if (access.is_finance) cards.push({ tab: 'payouts', k: 'Withdrawals', id: 'ts-wd', s: 'open requests' });
-    $('team-shortcuts').innerHTML = cards.map(c => `
-      <button class="h-shortcut" data-open="${c.tab}">
-        <div class="h-k">${esc(c.k)}</div>
-        <div class="h-v"${c.id ? ` id="${c.id}"` : ''}>${c.v || '…'}</div>
-        <div class="h-s">${esc(c.s)}</div>
+    if (access.is_finance) stats.push({ tab: 'payouts', k: 'Withdrawals', id: 'ts-wd', s: 'open requests' });
+    $('team-shortcuts').innerHTML = stats.map(c => `
+      <button type="button" class="team-stat" data-open="${c.tab}">
+        <span class="k">${esc(c.k)}</span>
+        <span class="v" id="${c.id}">…</span>
+        <span class="s">${esc(c.s)}</span>
       </button>`).join('');
-    $('team-shortcuts').querySelectorAll('[data-open]').forEach(b => b.onclick = () => openTab(b.dataset.open));
+    $('team-actions').innerHTML = access.is_dev ? '<button type="button" class="mini-btn" data-open="peeks">Post sneak peek</button>' : '';
+    document.querySelectorAll('#team-shortcuts [data-open], #team-actions [data-open]').forEach(b => b.onclick = () => openTab(b.dataset.open));
     const fill = (id, p) => p.then(n => { if ($(id)) $(id).textContent = n; }).catch(() => { if ($(id)) $(id).textContent = '—'; });
     if (access.is_dev) {
       fill('ts-apps', apiRetry('/admin/media/applications?status=pending').then(r => r.applications.length));

@@ -59,7 +59,6 @@
   .input:focus { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(255,79,168,.18); }
   select.input { appearance: none; cursor: pointer; padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%23928E9C' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 14px; }
   select.input option { background: var(--surface-2); }
-  .crypto-fields { animation: fields-in var(--t-slow) var(--ease-out); }
   @keyframes fields-in { from { opacity: 0; transform: translateY(-4px); } }
   .note { font-size: 13px; color: var(--fg-3); margin-top: 10px; }
 
@@ -91,6 +90,8 @@
   .total b { font-family: var(--display); font-size: 30px; line-height: 1; font-weight: 700; letter-spacing: -.05em; color: var(--fg); font-variant-numeric: tabular-nums; }
   .error { color: var(--err); font-size: 13.5px; margin-top: 12px; }
   .error:empty { display: none; }
+  .consent { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 13px; line-height: 1.5; color: var(--fg-2); cursor: pointer; }
+  .consent input { width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; accent-color: var(--pink); cursor: pointer; }
   .trust { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.5; color: var(--fg-3); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
   .trust .i { width: 15px; height: 15px; margin-top: 1px; }
 
@@ -178,38 +179,16 @@
             <div class="step-head"><h2>Payment method</h2></div>
             <div class="options">
               <label class="opt">
-                <input type="radio" name="method" value="stripe" checked>
+                <input type="radio" name="method" value="sellauth" checked>
                 <span class="opt-box">
                   <span class="opt-top">
                     <span class="opt-icon"><svg class="i" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/></svg></span>
                     <span class="radio"></span>
                   </span>
-                  <span class="opt-name">Card</span>
-                  <span class="opt-sub" id="stripe-sub">Visa, Mastercard, Apple Pay, Google Pay · via Stripe</span>
+                  <span class="opt-name">Secure checkout</span>
+                  <span class="opt-sub" id="sellauth-sub">Choose how to pay in the payment window · via SellAuth</span>
                 </span>
               </label>
-              <label class="opt">
-                <input type="radio" name="method" value="crypto">
-                <span class="opt-box">
-                  <span class="opt-top">
-                    <span class="opt-icon"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4m0 0h4.5a2 2 0 0 1 0 4H9.5m0-8v8m2-10v2m0 8v2"/></svg></span>
-                    <span class="radio"></span>
-                  </span>
-                  <span class="opt-name">Crypto</span>
-                  <span class="opt-sub" id="crypto-sub">USDT, BTC, LTC and more · via 0xProcessing</span>
-                </span>
-              </label>
-            </div>
-            <div class="crypto-fields" id="crypto-fields" hidden>
-              <div class="field">
-                <label for="coin">Cryptocurrency</label>
-                <select class="input" id="coin"><option value="">Loading…</option></select>
-              </div>
-              <div class="field">
-                <label for="email">Email for your payment receipt</label>
-                <input class="input" id="email" type="email" placeholder="you@example.com" autocomplete="email" maxlength="200">
-              </div>
-              <p class="note">0xProcessing needs an email for the receipt. The exact crypto amount is shown on the next page.</p>
             </div>
           </fieldset>
 
@@ -235,11 +214,12 @@
             <div class="line" id="sum-fee-row" hidden><span>Processing fee</span><span id="sum-fee">€0.00</span></div>
           </div>
           <div class="total"><span>Total</span><b id="sum-total">€15.00</b></div>
+          <label class="consent"><input type="checkbox" id="final-sale"><span id="final-sale-text">I want my license key delivered immediately after payment. I understand that I lose my 14-day right of withdrawal once the key is delivered, and that all sales are final and non-refundable.</span></label>
           <button class="btn btn-primary btn-lg btn-block pay" id="pay" type="button">Continue to payment</button>
           <div class="error" id="pay-error" role="alert"></div>
           <div class="trust">
             <svg class="i" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-            <span>You pay on Stripe's or 0xProcessing's secure page. We never see your card details.</span>
+            <span>You pay in SellAuth's secure checkout window. We never see your payment details.</span>
           </div>
         </aside>
       </div>
@@ -256,6 +236,8 @@
   </div>
 </footer>
 
+<!-- SellAuth checkout embed v3.2.0, served from here (sha384 matches SellAuth's published hash for this release) -->
+<script src="assets/sellauth-embed-v3.2.0.min.js"></script>
 <script src="zynth.js"></script>
 <script>
 (function () {
@@ -333,7 +315,7 @@
   const method = () => document.querySelector('input[name=method]:checked').value;
 
   function saveDraft() {
-    store.set(SAVED, JSON.stringify({ product: product(), method: method(), code: applied?.code || $('code').value.trim(), email: $('email').value.trim() }));
+    store.set(SAVED, JSON.stringify({ product: product(), method: method(), code: applied?.code || $('code').value.trim() }));
   }
   function restoreDraft() {
     const params = new URLSearchParams(location.search);
@@ -343,7 +325,6 @@
     const p = params.get('product') || d.product;
     if (p) { const r = document.querySelector(`input[name=product][value="${p}"]`); if (r) r.checked = true; }
     if (d.method) { const r = document.querySelector(`input[name=method][value="${d.method}"]`); if (r && !r.disabled) r.checked = true; }
-    if (d.email) $('email').value = d.email;
     const code = params.get('code') || d.code;
     if (code) $('code').value = code;
   }
@@ -363,15 +344,14 @@
     $('sum-fee-row').hidden = !fee;
     $('sum-fee').textContent = euros(fee);
     $('sum-total').textContent = euros(base - discount + fee);
-    $('crypto-fields').hidden = method() !== 'crypto';
     updatePay();
   }
 
   function updatePay() {
     const btn = $('pay');
     if (!user) { btn.textContent = 'Log in with Discord'; btn.disabled = false; return; }
-    btn.disabled = busy;
-    btn.textContent = busy ? 'Starting payment…' : method() === 'crypto' ? 'Continue to crypto payment' : 'Continue to payment';
+    btn.disabled = busy || !cfg?.methods?.sellauth?.available;
+    btn.textContent = busy ? 'Starting payment…' : 'Continue to payment';
   }
 
   // ── Codes ───────────────────────────────────────────────────
@@ -394,7 +374,8 @@
         $('code-applied').innerHTML = `<span class="code-chip">${esc(r.code.code)} · −${euros(r.code.discount_cents)}<button type="button" id="remove-code" aria-label="Remove code">×</button></span>`;
         $('remove-code').onclick = removeCode;
         msg.className = 'code-msg ok';
-        msg.textContent = r.code.type === 'media' ? `Creator code applied. You save ${euros(r.code.discount_cents)}.` : `Code applied. You save ${euros(r.code.discount_cents)}.`;
+        msg.textContent = r.total_cents === 0 ? 'Code applied. This one is free.'
+          : `${r.code.type === 'media' ? 'Creator code' : 'Code'} accepted. Enter ${r.code.code} again in the payment window to save ${euros(r.code.discount_cents)}.`;
       }
     } catch (e) {
       msg.className = 'code-msg err'; msg.textContent = e.message;
@@ -415,18 +396,31 @@
   async function pay() {
     $('pay-error').textContent = '';
     if (!user) return login();
-    const body = { product: product(), method: method(), code: applied?.code || undefined };
-    if (body.method === 'crypto') {
-      body.crypto_currency = $('coin').value;
-      body.email = $('email').value.trim();
-      if (!body.crypto_currency) return ($('pay-error').textContent = 'Choose a cryptocurrency.');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) return ($('pay-error').textContent = 'Enter a valid email address.');
-    }
+    if (!$('final-sale').checked) { $('pay-error').textContent = 'Please confirm that all sales are final before paying.'; $('final-sale').focus(); return; }
+    if (!window.sellAuth) { $('pay-error').textContent = "The payment window couldn't load. If you use an ad blocker, allow this site and reload."; return; }
+    const body = { product: product(), method: method(), code: applied?.code || undefined,
+      accept_final_sale: true, final_sale_version: cfg?.final_sale?.version };
     busy = true; updatePay();
     try {
       const r = await api('/checkout/create', { method: 'POST', body: JSON.stringify(body) });
-      if (r.free || !r.redirect_url) { location.href = `${location.pathname}?order=${r.order.id}`; return; }
-      location.href = r.redirect_url;
+      const orderUrl = `${location.pathname}?order=${r.order.id}`;
+      if (r.free) { location.href = orderUrl; return; }
+      // SellAuth checkout opens on top of this page. The order id travels as invoice metadata,
+      // which is how the backend knows which Discord account gets the key.
+      const e = r.sellauth;
+      let invoiceCreated = false;
+      window.sellAuth.open({
+        shopId: e.shopId, shopUrl: e.shopUrl, cart: e.cart, metadata: e.metadata, skipCart: true, locale: 'en',
+        onInvoiceCreated: ({ invoiceId }) => {
+          invoiceCreated = true;
+          api(`/checkout/order/${r.order.id}/invoice`, { method: 'POST', body: JSON.stringify({ invoice_id: invoiceId }) }).catch(() => {});
+        },
+        onSuccess: () => { location.href = orderUrl; },
+        onClose: () => {
+          if (invoiceCreated) { location.href = orderUrl; return; }
+          busy = false; updatePay();
+        },
+      });
     } catch (e) {
       $('pay-error').textContent = e.message;
       busy = false; updatePay();
@@ -470,10 +464,9 @@
         return statusCard('bad', 'Payment cancelled', "No money was taken. You can try again whenever you're ready.", '<a class="btn btn-primary" href="checkout.html">Try again</a>');
       }
       if (o.status === 'pending') {
-        statusCard('wait', 'Waiting for your payment', o.payment_method === 'crypto'
-          ? 'Crypto payments need a few blockchain confirmations. You can close this page; your key arrives in your Discord DMs.'
-          : 'This usually takes a few seconds.', receipt);
-        if (Date.now() - started < 30 * 60 * 1000) setTimeout(tick, o.payment_method === 'crypto' ? 10000 : 3000);
+        statusCard('wait', 'Waiting for your payment',
+          'Card payments take a few seconds, crypto can take a few minutes. This page updates by itself, and your key also arrives in your Discord DMs.', receipt);
+        if (Date.now() - started < 30 * 60 * 1000) setTimeout(tick, 5000);
         return;
       }
       const texts = {
@@ -502,26 +495,16 @@
       $('pay').disabled = true;
       return;
     }
+    if (cfg.final_sale?.text) $('final-sale-text').textContent = cfg.final_sale.text;
     for (const p of cfg.products) {
       const el = document.querySelector(`[data-price="${p.id}"]`);
       if (el) el.textContent = euros(p.price_cents).replace('.00', '');
     }
-    for (const m of ['stripe', 'crypto']) {
-      if (!cfg.methods[m].available) {
-        const r = document.querySelector(`input[name=method][value="${m}"]`);
-        r.disabled = true;
-        $(m + '-sub').textContent = 'Not available right now';
-        if (r.checked) { const other = document.querySelector(`input[name=method]:not([value="${m}"])`); if (!other.disabled) other.checked = true; }
-      }
-    }
-  }
-  async function loadCoins() {
-    if (!cfg?.methods.crypto.available) return;
-    try {
-      const { coins } = await api('/checkout/coins');
-      $('coin').innerHTML = '<option value="">Choose a coin</option>' + coins.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
-    } catch (e) {
-      $('coin').innerHTML = '<option value="">Unavailable</option>';
+    if (!cfg.methods.sellauth?.available) {
+      document.querySelector('input[name=method][value="sellauth"]').disabled = true;
+      $('sellauth-sub').textContent = 'Not available right now';
+      $('pay-error').textContent = 'Checkout is offline right now. Please try again in a few minutes.';
+      $('pay').disabled = true;
     }
   }
 
@@ -544,7 +527,6 @@
 
     const params = new URLSearchParams(location.search);
     if (params.get('order')) return showOrder(params.get('order'), params.has('cancelled'));
-    loadCoins();
     if ($('code').value.trim() && user) applyCode(true);
   })();
 })();
