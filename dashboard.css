@@ -276,7 +276,7 @@ kbd { display: inline-block; font: 500 12px/1 var(--mono); padding: 3px 6px; bor
 .h-form .mini-btn { justify-self: start; height: 38px; padding: 0 16px; font-size: 14px; }
 
 /* Team panel: one surface, sections divided by hairlines */
-.team { margin: 28px 0 16px; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-lg); box-shadow: var(--shadow-1); overflow: hidden; }
+section.team { margin: 28px 0 16px; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-lg); box-shadow: var(--shadow-1); overflow: hidden; }
 .team-head { display: flex; align-items: center; gap: 10px; padding: 18px 24px; border-bottom: 1px solid var(--line); }
 .team-head h2 { font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
 .team-actions { margin-left: auto; display: flex; gap: 8px; }
@@ -600,3 +600,15 @@ body.authed footer { display: none; }
 /* Legacy shells kept for script compatibility */
 .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .card { padding: 20px; }
+
+/* Downloads (Dev): maintenance switch */
+.dl-switch { display: inline-flex; align-items: center; gap: 12px; margin-top: 18px; cursor: pointer; user-select: none; }
+.dl-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.dl-switch-track { position: relative; width: 44px; height: 24px; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--line-2); transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease; flex-shrink: 0; }
+.dl-switch-track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--fg-3); transition: transform var(--t) var(--ease-out), background-color var(--t-fast) ease; }
+.dl-switch input:checked + .dl-switch-track { background: var(--pink); border-color: var(--pink); }
+.dl-switch input:checked + .dl-switch-track::after { transform: translateX(20px); background: #fff; }
+.dl-switch input:focus-visible + .dl-switch-track { box-shadow: 0 0 0 3px rgba(255,79,168,.3); }
+.dl-switch-text { font-size: 14.5px; font-weight: 500; color: var(--fg); }
+.dl-message { margin-top: 18px; }
+.btn-dl.paused + .h-dl-help { display: none; }

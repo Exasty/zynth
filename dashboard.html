@@ -182,6 +182,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
             Discount codes
           </button>
+          <button type="button" class="menu-item" data-tab="downloads" id="menu-downloads" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5"/><path d="M4.5 16.5v2a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-2"/></svg>
+            Downloads
+          </button>
           <button type="button" class="menu-item" data-tab="payouts" id="menu-payouts" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 9.5v6M18 9.5v6"/></svg>
             Payouts
@@ -508,6 +512,26 @@
     </div>
     <!-- /TAB: MEDIA MANAGE -->
 
+    <!-- TAB: DOWNLOADS (Dev) -->
+    <div class="tab-panel" id="tab-downloads" style="display:none">
+      <div class="dash-header">
+        <h1 class="dash-title" tabindex="-1">Downloads</h1><span class="dash-eyebrow">Dev only</span>
+        <p class="dash-sub">Pause client downloads for maintenance, for example while a new build is uploaded. Devs can still download to test.</p>
+      </div>
+      <div class="panel-box">
+        <h3>Download status</h3>
+        <div class="sub" id="dlc-status">Loading…</div>
+        <form id="downloads-form" autocomplete="off">
+          <label class="dl-switch"><input type="checkbox" id="dlc-enabled" role="switch"><span class="dl-switch-track" aria-hidden="true"></span><span class="dl-switch-text">Allow downloads</span></label>
+          <div class="f dl-message"><label for="dlc-message">Message while downloads are paused</label>
+            <textarea id="dlc-message" maxlength="300" rows="3" placeholder="Downloads are paused for maintenance. Please check back soon."></textarea>
+            <span class="hint">Shown on everyone's download button and when they try to download. Leave empty for the default text.</span></div>
+          <div class="form-actions"><button class="btn-imgup" type="submit">Save</button><span class="msg" id="dlc-msg" aria-live="polite"></span></div>
+        </form>
+      </div>
+    </div>
+    <!-- /TAB: DOWNLOADS -->
+
     <!-- TAB: CODES (Dev) -->
     <div class="tab-panel" id="tab-codes" style="display:none">
       <div class="dash-header">
@@ -702,7 +726,7 @@ function showLogin()     { document.documentElement.classList.remove('booting');
 function showDashboard() { document.documentElement.classList.remove('booting'); document.body.classList.add('authed'); document.getElementById('screen-login').style.display = 'none'; document.getElementById('screen-dashboard').style.display = 'block'; }
 
 // ── SIDEBAR / TABS ────────────────────────────────────────────
-const TABS = ['dashboard', 'reviews', 'clips', 'peeks', 'media', 'mediamgr', 'codes', 'payouts'];
+const TABS = ['dashboard', 'reviews', 'clips', 'peeks', 'media', 'mediamgr', 'codes', 'downloads', 'payouts'];
 
 // Each tab has its own address (dashboard.html#codes), so refresh, back/forward and shared links work.
 // push = true for user navigation (adds a history entry), false for programmatic switches.
@@ -924,6 +948,30 @@ function applyLicense(lic, user) {
   fetchAccess(user, lic).then(() => { loadReviews(); loadClips(); });
 }
 
+// ── DOWNLOAD MAINTENANCE ─────────────────────────────────────
+// While Devs have paused downloads, the button shows their message instead. Devs keep the
+// button so they can test builds.
+async function applyDownloadStatus() {
+  const btn = document.getElementById('btn-download'), desc = document.getElementById('dl-desc');
+  if (!btn || !desc) return;
+  let s;
+  try { s = await (await fetch(`${API_URL}/downloads/status`)).json(); } catch { return; }
+  if (s.enabled) {
+    if (btn.dataset.paused) {
+      desc.textContent = btn.dataset.paused;
+      if (btn.dataset.pausedLocked) btn.classList.remove('locked');
+      delete btn.dataset.paused; delete btn.dataset.pausedLocked;
+    }
+    btn.classList.remove('paused');
+    return;
+  }
+  if (!btn.dataset.paused) btn.dataset.paused = desc.textContent;
+  btn.classList.add('paused');
+  if (CURRENT_ACCESS.is_dev) { desc.textContent = `${s.message} (Downloads are paused; as a Dev you can still download.)`; return; }
+  desc.textContent = s.message;
+  if (!btn.classList.contains('locked')) { btn.classList.add('locked'); btn.dataset.pausedLocked = '1'; }
+}
+
 // ── ACCESS (Staff / Dev) ─────────────────────────────────────
 async function fetchAccess(user, lic) {
   // Retried, and a failure keeps the roles already known: a busy Discord must not hide Dev/Staff features.
@@ -944,6 +992,7 @@ async function fetchAccess(user, lic) {
     if (CURRENT_ACCESS.is_dev) loadStaffActions();
   }
   if (typeof setupPeeksAccess === "function") setupPeeksAccess();
+  applyDownloadStatus();
 }
 
 async function loadStaffActions() {
@@ -1920,6 +1969,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     $('menu-media').style.display = 'flex';
     $('menu-mediamgr').style.display = access.is_dev ? 'flex' : 'none';
     $('menu-codes').style.display = access.is_dev ? 'flex' : 'none';
+    $('menu-downloads').style.display = access.is_dev ? 'flex' : 'none';
     $('menu-payouts').style.display = access.is_finance ? 'flex' : 'none';
 
     const role = ROLES.find(([k]) => access[k]);
@@ -1929,19 +1979,45 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     setupTeam(access);
   };
   document.getElementById('btn-logout').addEventListener('click', () => {
-    ['menu-media', 'menu-mediamgr', 'menu-codes', 'menu-payouts'].forEach(id => { $(id).style.display = 'none'; });
+    ['menu-media', 'menu-mediamgr', 'menu-codes', 'menu-downloads', 'menu-payouts'].forEach(id => { $(id).style.display = 'none'; });
     $('team-section').style.display = 'none';
     Object.keys(loaded).forEach(k => delete loaded[k]);
   });
-  document.querySelectorAll('.menu-item[data-tab="media"], .menu-item[data-tab="mediamgr"], .menu-item[data-tab="codes"], .menu-item[data-tab="payouts"]').forEach(btn => {
+  document.querySelectorAll('.menu-item[data-tab="media"], .menu-item[data-tab="mediamgr"], .menu-item[data-tab="codes"], .menu-item[data-tab="downloads"], .menu-item[data-tab="payouts"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
       if (loaded[tab]) return;
       loaded[tab] = true;
-      ({ media: loadMedia, mediamgr: loadMediaManager, codes: loadCodes, payouts: loadPayouts })[tab]();
+      ({ media: loadMedia, mediamgr: loadMediaManager, codes: loadCodes, downloads: loadDownloadsAdmin, payouts: loadPayouts })[tab]();
     });
   });
   const openTab = tab => document.querySelector(`.menu-item[data-tab="${tab}"]`).click();
+
+  // ── Downloads (Dev): maintenance switch ─────────────────────
+  function renderDownloadsAdmin(d) {
+    $('dlc-enabled').checked = d.enabled;
+    $('dlc-message').value = d.message;
+    const when = d.updated_at ? ` Last changed ${esc(new Date(d.updated_at).toLocaleString())}${d.updated_by ? ` by ${CURRENT_USER && d.updated_by === CURRENT_USER.id ? 'you' : `<code>${esc(d.updated_by)}</code>`}` : ''}.` : '';
+    $('dlc-status').innerHTML = (d.enabled
+      ? '<span class="badge green">On</span> Everyone with a license can download the client.'
+      : '<span class="badge red">Paused</span> Only Devs can download right now.') + when;
+  }
+  async function loadDownloadsAdmin() {
+    try { renderDownloadsAdmin((await api('/admin/downloads')).downloads); }
+    catch (e) { $('dlc-status').textContent = e.message; }
+  }
+  $('downloads-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const enabled = $('dlc-enabled').checked;
+    $('dlc-msg').textContent = 'Saving…';
+    try {
+      const r = await api('/admin/downloads', { method: 'PATCH', body: JSON.stringify({ enabled, message: $('dlc-message').value.trim() }) });
+      renderDownloadsAdmin(r.downloads);
+      $('dlc-msg').textContent = '';
+      toast(enabled ? 'Downloads are on again.' : 'Downloads are paused.', enabled ? 'green' : 'red');
+      if (typeof applyDownloadStatus === 'function') applyDownloadStatus();
+    } catch (err) { $('dlc-msg').textContent = err.message; }
+  });
 
   // ── Team section on the main page ───────────────────────────
   function setupTeam(access) {
@@ -2459,6 +2535,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
       if (tab === 'dashboard') {
         const hwidBtn = document.getElementById('btn-hwid-reset');
         if (CURRENT_LIC && hwidBtn.textContent !== 'Resetting…') loadHWIDStatus(CURRENT_USER, CURRENT_LIC);
+        applyDownloadStatus();
         if (access) setupTeam(access);
         if (CURRENT_ACCESS.is_dev) loadStaffActions();
       }
