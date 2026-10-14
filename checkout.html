@@ -408,16 +408,18 @@
       // SellAuth checkout opens on top of this page. The order id travels as invoice metadata,
       // which is how the backend knows which Discord account gets the key.
       const e = r.sellauth;
-      let invoiceCreated = false;
+      let paid = false;
       window.sellAuth.open({
         shopId: e.shopId, shopUrl: e.shopUrl, cart: e.cart, metadata: e.metadata, skipCart: true, locale: 'en',
         onInvoiceCreated: ({ invoiceId }) => {
-          invoiceCreated = true;
           api(`/checkout/order/${r.order.id}/invoice`, { method: 'POST', body: JSON.stringify({ invoice_id: invoiceId }) }).catch(() => {});
         },
-        onSuccess: () => { location.href = orderUrl; },
-        onClose: () => {
-          if (invoiceCreated) { location.href = orderUrl; return; }
+        onSuccess: () => { paid = true; location.href = orderUrl; },
+        onClose: ({ reason } = {}) => {
+          if (paid || reason === 'success') { location.href = orderUrl; return; }
+          // Closed without paying: drop this attempt so the buyer can change plan or code and start again.
+          api(`/checkout/order/${r.order.id}/cancel`, { method: 'POST' }).catch(() => {});
+          $('pay-error').textContent = 'Payment cancelled. Nothing was charged. You can change your plan or code and try again.';
           busy = false; updatePay();
         },
       });
